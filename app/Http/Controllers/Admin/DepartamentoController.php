@@ -10,11 +10,11 @@ class DepartamentoController extends Controller
 {
     public function index()
     {
-        $departamentos = Departamento::latest()->paginate(10);
+        $departamentos = Departamento::oldest()->paginate(10);
         return view('admin.departamentos.index', compact('departamentos'));
     }
 
-   
+
 
     public function store(Request $request)
     {
@@ -47,12 +47,16 @@ class DepartamentoController extends Controller
             'estado' => $request->has('estado'),
         ]);
 
-        return redirect()->route('admin.departamentos.index')->with('mensaje', 'Departamento actualizado correctamente.');
+        return redirect()->route('admin.departamentos.index')
+                ->with('mensaje', 'Departamento actualizado correctamente.')
+                ->with('icono', 'success');
     }
 
     public function destroy(Departamento $departamento)
     {
         $departamento->delete();
-        return redirect()->route('admin.departamentos.index')->with('mensaje', 'Departamento eliminado correctamente.');
+        return redirect()->route('admin.departamentos.index')
+                ->with('mensaje', 'Departamento eliminado correctamente.')
+                ->with('icono', 'success');
     }
 }

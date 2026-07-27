@@ -1,4 +1,4 @@
-<x-layouts::app title="Usuarios del Sistema">
+<x-layouts::app title="Listado de Usuarios">
     <div class="relative mb-6 w-full">
         <flux:heading size="xl" level="1">Listado de usuarios</flux:heading>
         <br>

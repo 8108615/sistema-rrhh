@@ -1,4 +1,4 @@
-<x-layouts::app title="Sistema Clinico">
+<x-layouts::app title="Listado de Roles">
     <div class="relative mb-6 w-full">
         <flux:heading size="xl" level="1">Roles del sistema</flux:heading>
         <br>

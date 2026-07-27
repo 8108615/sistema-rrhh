@@ -12,25 +12,45 @@
 
             <flux:sidebar.nav>
                 <flux:sidebar.group :heading="__('Platform')" class="grid">
-                    <flux:sidebar.item icon="home" :href="route('dashboard')" :current="request()->routeIs('dashboard')" wire:navigate>
-                        {{ __('Dashboard') }}
+                    <flux:sidebar.item icon="home" :href="route('dashboard')" :current="request()->routeIs('dashboard')"
+                                wire:navigate>{{ __('Dashboard') }}
+
                     </flux:sidebar.item>
 
                     <flux:navlist.item icon="cog-6-tooth" :href="route('admin.ajustes.index')"
-                        :current="request()->routeIs('admin.ajustes.index')" wire:navigate>Ajustes
+                                :current="request()->routeIs('admin.ajustes.index')" wire:navigate>Ajustes
                     </flux:navlist.item>
 
                     <flux:navlist.item icon="shield-check" :href="route('admin.roles.index')"
-                        :current="request()->routeIs('admin.roles.index')" wire:navigate>Roles
+                                :current="request()->routeIs('admin.roles.index')" wire:navigate>Roles
                     </flux:navlist.item>
 
                     <flux:navlist.item icon="users" :href="route('admin.usuarios.index')"
-                        :current="request()->routeIs('admin.usuarios.index')" wire:navigate>Usuarios
+                                :current="request()->routeIs('admin.usuarios.index')" wire:navigate>Usuarios
                     </flux:navlist.item>
 
                     <flux:navlist.item icon="building-office" :href="route('admin.departamentos.index')"
-                        :current="request()->routeIs('admin.departamentos.index')" wire:navigate>Departamentos
+                                :current="request()->routeIs('admin.departamentos.index')" wire:navigate>Departamentos
                     </flux:navlist.item>
+
+                    <flux:navlist.item icon="rectangle-group" :href="route('admin.areas.index')"
+                                :current="request()->routeIs('admin.areas.index')" wire:navigate>Áreas
+                    </flux:navlist.item>
+                    <flux:navlist.item icon="briefcase" :href="route('admin.cargos.index')"
+                                :current="request()->routeIs('admin.cargos.index')" wire:navigate>Cargos
+                    </flux:navlist.item>
+
+                    <!-- Sección de Gestión de Personal / Recursos Humanos -->
+                    <flux:navlist.group heading="Personal">
+                        <flux:navlist.item icon="users" :href="route('admin.empleados.index')" :current="request()->routeIs('admin.empleados*')">
+                            Empleados
+                        </flux:navlist.item>
+
+                        <!-- Nuevo enlace para Planillas -->
+                        <flux:navlist.item icon="banknotes" :href="route('admin.planillas.index')" :current="request()->routeIs('admin.planillas*')">
+                            Planillas
+                        </flux:navlist.item>
+                    </flux:navlist.group>
                 </flux:sidebar.group>
             </flux:sidebar.nav>
 
