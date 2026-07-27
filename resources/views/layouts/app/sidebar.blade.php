@@ -46,9 +46,14 @@
                             Empleados
                         </flux:navlist.item>
 
-                        <!-- Nuevo enlace para Planillas -->
+                        <!-- Enlace para Planillas -->
                         <flux:navlist.item icon="banknotes" :href="route('admin.planillas.index')" :current="request()->routeIs('admin.planillas*')">
                             Planillas
+                        </flux:navlist.item>
+
+                        <!-- Enlace para Pagos de Empleados -->
+                        <flux:navlist.item icon="credit-card" :href="route('admin.pagos.index')" :current="request()->routeIs('admin.pagos*')">
+                            Pagos
                         </flux:navlist.item>
                     </flux:navlist.group>
                 </flux:sidebar.group>

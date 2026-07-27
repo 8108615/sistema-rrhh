@@ -1,4 +1,8 @@
 <x-layouts::app title="Gestión de Planillas">
+    @php
+        $simboloMoneda = $ajuste->divisa ?? 'Bs.';
+    @endphp
+
     <div class="relative mb-6 w-full flex justify-between items-center">
         <div>
             <flux:heading size="xl" level="1">Planillas de Sueldos</flux:heading>
@@ -55,7 +59,7 @@
                         <th class="py-3.5 px-6">Mes y Año</th>
                         <th class="py-3.5 px-6">Total Pagado</th>
                         <th class="py-3.5 px-6">Estado</th>
-                        <th class="py-3.5 px-6 text-right">Acciones</th>
+                        <th class="py-3.5 px-6 text-center">Acciones</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-200 dark:divide-zinc-700 text-sm text-gray-700 dark:text-gray-300">
@@ -68,7 +72,7 @@
                                 {{ $planilla->mes }} de {{ $planilla->anio }}
                             </td>
                             <td class="py-4 px-6 font-semibold text-emerald-600 dark:text-emerald-400">
-                                {{ number_format($planilla->total_pagado, 2, ',', '.') }} Bs.
+                                {{ number_format($planilla->total_pagado, 2, ',', '.') }} {{ $simboloMoneda }}
                             </td>
                             <td class="py-4 px-6">
                                 @if ($planilla->estado == 'Pagado')
@@ -77,7 +81,17 @@
                                     <span class="px-3 py-1 inline-flex text-xs font-semibold rounded-full bg-amber-500 text-white">Pendiente</span>
                                 @endif
                             </td>
-                            <td class="py-4 px-6 text-right space-x-2">
+                            <td class="py-4 px-6 text-center space-x-2">
+                                <!-- Botón Pagar (Solo si está pendiente) -->
+                                @if ($planilla->estado != 'Pagado')
+                                    <form action="{{ route('admin.planillas.pagar', $planilla->id) }}" method="POST" class="inline-block pagar-form">
+                                        @csrf
+                                        @method('PATCH')
+                                        <button type="submit" class="inline-flex items-center px-3 py-1.5 bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-medium rounded-md shadow-sm transition cursor-pointer">
+                                            <i class="fas fa-check-circle mr-1.5"></i> Pagar
+                                        </button>
+                                    </form>
+                                @endif
                                 <!-- Botón Ver Detalle -->
                                 <a href="{{ route('admin.planillas.show', $planilla->id) }}" class="inline-flex items-center px-3 py-1.5 bg-sky-500 hover:bg-sky-600 text-white text-xs font-medium rounded-md shadow-sm transition">
                                     <i class="fas fa-eye mr-1.5"></i> Ver
@@ -121,6 +135,7 @@
     @push('scripts')
     <script>
         document.addEventListener('DOMContentLoaded', function () {
+            // Confirmación para Eliminar
             const deleteForms = document.querySelectorAll('.delete-form');
             deleteForms.forEach(form => {
                 form.addEventListener('submit', function (e) {
@@ -133,6 +148,28 @@
                         confirmButtonColor: '#ef4444',
                         cancelButtonColor: '#6b7280',
                         confirmButtonText: 'Sí, eliminar',
+                        cancelButtonText: 'Cancelar'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            form.submit();
+                        }
+                    });
+                });
+            });
+
+            // Confirmación para Pagar
+            const pagarForms = document.querySelectorAll('.pagar-form');
+            pagarForms.forEach(form => {
+                form.addEventListener('submit', function (e) {
+                    e.preventDefault();
+                    Swal.fire({
+                        title: '¿Confirmar pago de planilla?',
+                        text: "Esta acción cambiará el estado de la planilla a 'Pagado'.",
+                        icon: 'question',
+                        showCancelButton: true,
+                        confirmButtonColor: '#10b981',
+                        cancelButtonColor: '#6b7280',
+                        confirmButtonText: 'Sí, marcar como pagado',
                         cancelButtonText: 'Cancelar'
                     }).then((result) => {
                         if (result.isConfirmed) {

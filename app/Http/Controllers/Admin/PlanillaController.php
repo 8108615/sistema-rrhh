@@ -19,20 +19,23 @@ class PlanillaController extends Controller
 
         $planillas = Planilla::when($buscar, function ($query, $buscar) {
                 return $query->where('mes', 'like', "%{$buscar}%")
-                             ->orWhere('anio', 'like', "%{$buscar}%")
-                             ->orWhere('estado', 'like', "%{$buscar}%");
+                           ->orWhere('anio', 'like', "%{$buscar}%")
+                           ->orWhere('estado', 'like', "%{$buscar}%");
             })
             ->orderBy('anio', 'desc')
             ->orderBy('id', 'desc')
             ->paginate(10);
 
-        return view('admin.planillas.index', compact('planillas', 'buscar'));
+        $ajuste = Ajuste::first(); // <-- Añadido aquí
+
+        return view('admin.planillas.index', compact('planillas', 'buscar', 'ajuste')); // <-- Añadido aquí
     }
 
     // Vista para crear/generar una nueva planilla
     public function create()
     {
-        return view('admin.planillas.create');
+        $ajuste = Ajuste::first();
+        return view('admin.planillas.create', compact('ajuste'));
     }
 
     // Guardar y generar automáticamente la planilla con los empleados activos
@@ -121,5 +124,14 @@ class PlanillaController extends Controller
 
         // tu lógica de PDF...
         return view('admin.planillas.pdf', compact('planilla', 'ajuste'));
+    }
+    public function marcarComoPagado(Planilla $planilla)
+    {
+        $planilla->update([
+            'estado' => 'Pagado'
+        ]);
+
+        return redirect()->route('admin.planillas.index')
+            ->with('success', 'La planilla del mes de ' . $planilla->mes . ' de ' . $planilla->anio . ' ha sido marcada como Pagada exitosamente.');
     }
 }

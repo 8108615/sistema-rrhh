@@ -38,4 +38,8 @@ class Empleado extends Model
     {
         return $this->belongsTo(Area::class);
     }
+    public function pagos()
+    {
+        return $this->hasMany(PagoEmpleado::class, 'empleado_id');
+    }
 }

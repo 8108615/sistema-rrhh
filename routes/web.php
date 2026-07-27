@@ -69,4 +69,17 @@ Route::get('/admin/planillas/{planilla}/edit', [App\Http\Controllers\Admin\Plani
 Route::put('/admin/planillas/{planilla}', [App\Http\Controllers\Admin\PlanillaController::class, 'update'])->name('admin.planillas.update')->middleware('auth');
 Route::delete('/admin/planillas/{planilla}', [App\Http\Controllers\Admin\PlanillaController::class, 'destroy'])->name('admin.planillas.destroy')->middleware('auth');
 Route::get('/admin/planillas/{id}/pdf', [App\Http\Controllers\Admin\PlanillaController::class, 'pdf'])->name('admin.planillas.pdf')->middleware('auth');
+Route::patch('/admin/planillas/{planilla}/pagar', [App\Http\Controllers\Admin\PlanillaController::class, 'marcarComoPagado'])->name('admin.planillas.pagar')->middleware('auth');
+
+// Rutas para pagos de empleados
+Route::get('/admin/pagos', [App\Http\Controllers\Admin\PagoEmpleadoController::class, 'index'])->name('admin.pagos.index')->middleware('auth');
+Route::get('/admin/pagos/create', [App\Http\Controllers\Admin\PagoEmpleadoController::class, 'create'])->name('admin.pagos.create')->middleware('auth');
+Route::post('/admin/pagos', [App\Http\Controllers\Admin\PagoEmpleadoController::class, 'store'])->name('admin.pagos.store')->middleware('auth');
+Route::get('/admin/pagos/{id}/print', [App\Http\Controllers\Admin\PagoEmpleadoController::class, 'print'])->name('admin.pagos.print')->middleware('auth');
+Route::get('/admin/pagos/{id}', [App\Http\Controllers\Admin\PagoEmpleadoController::class, 'show'])->name('admin.pagos.show')->middleware('auth');
+Route::get('/admin/pagos/{id}/edit', [App\Http\Controllers\Admin\PagoEmpleadoController::class, 'edit'])->name('admin.pagos.edit')->middleware('auth');
+Route::put('/admin/pagos/{id}', [App\Http\Controllers\Admin\PagoEmpleadoController::class, 'update'])->name('admin.pagos.update')->middleware('auth');
+Route::delete('/admin/pagos/{id}', [App\Http\Controllers\Admin\PagoEmpleadoController::class, 'destroy'])->name('admin.pagos.destroy')->middleware('auth');
+
+
 require __DIR__.'/settings.php';

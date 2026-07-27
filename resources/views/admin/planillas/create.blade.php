@@ -1,4 +1,8 @@
 <x-layouts::app title="Generar Planilla">
+    @php
+        $simboloMoneda = $ajuste->divisa ?? 'Bs.';
+    @endphp
+
     <div class="relative mb-6 w-full flex justify-between items-center">
         <div>
             <flux:heading size="xl" level="1">Generar Nueva Planilla</flux:heading>
@@ -69,7 +73,7 @@
                 <flux:icon name="information-circle" class="h-5 w-5 text-sky-500 flex-shrink-0 mt-0.5" />
                 <div>
                     <span class="font-semibold block mb-0.5">Nota importante:</span>
-                    Al generar la planilla, el sistema tomará de forma automática a todos los empleados que se encuentren con estado <strong>Activo</strong> y registrará sus sueldos base actuales.
+                    Al generar la planilla, el sistema tomará de forma automática a todos los empleados activos y registrará sus sueldos base actuales expresados en la moneda configurada: <strong class="underline">{{ $simboloMoneda }}</strong>.
                 </div>
             </div>
 
