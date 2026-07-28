@@ -81,5 +81,25 @@ Route::get('/admin/pagos/{id}/edit', [App\Http\Controllers\Admin\PagoEmpleadoCon
 Route::put('/admin/pagos/{id}', [App\Http\Controllers\Admin\PagoEmpleadoController::class, 'update'])->name('admin.pagos.update')->middleware('auth');
 Route::delete('/admin/pagos/{id}', [App\Http\Controllers\Admin\PagoEmpleadoController::class, 'destroy'])->name('admin.pagos.destroy')->middleware('auth');
 
+// Rutas para Permisos y Vacaciones
+Route::get('/admin/permisos', [App\Http\Controllers\Admin\PermisoController::class, 'index'])->name('admin.permisos.index')->middleware('auth');
+Route::get('/admin/permisos/create', [App\Http\Controllers\Admin\PermisoController::class, 'create'])->name('admin.permisos.create')->middleware('auth');
+Route::post('/admin/permisos', [App\Http\Controllers\Admin\PermisoController::class, 'store'])->name('admin.permisos.store')->middleware('auth');
+Route::get('/admin/permisos/{id}/edit', [App\Http\Controllers\Admin\PermisoController::class, 'edit'])->name('admin.permisos.edit')->middleware('auth');
+Route::put('/admin/permisos/{id}', [App\Http\Controllers\Admin\PermisoController::class, 'update'])->name('admin.permisos.update')->middleware('auth');
+Route::delete('/admin/permisos/{id}', [App\Http\Controllers\Admin\PermisoController::class, 'destroy'])->name('admin.permisos.destroy')->middleware('auth');
+
+// Ruta adicional opcional por si quieres cambiar el estado rápidamente (Aprobar / Rechazar)
+Route::patch('/admin/permisos/{id}/estado', [App\Http\Controllers\Admin\PermisoController::class, 'cambiarEstado'])->name('admin.permisos.estado')->middleware('auth');
+
+
+// Rutas para Finiquitos y Beneficios Sociales
+Route::get('/admin/finiquitos', [App\Http\Controllers\Admin\FiniquitoController::class, 'index'])->name('admin.finiquitos.index')->middleware('auth');
+Route::get('/admin/finiquitos/create', [App\Http\Controllers\Admin\FiniquitoController::class, 'create'])->name('admin.finiquitos.create')->middleware('auth');
+Route::post('/admin/finiquitos', [App\Http\Controllers\Admin\FiniquitoController::class, 'store'])->name('admin.finiquitos.store')->middleware('auth');
+Route::get('/admin/finiquitos/{id}', [App\Http\Controllers\Admin\FiniquitoController::class, 'show'])->name('admin.finiquitos.show')->middleware('auth');
+Route::delete('/admin/finiquitos/{id}', [App\Http\Controllers\Admin\FiniquitoController::class, 'destroy'])->name('admin.finiquitos.destroy')->middleware('auth');
+Route::get('/admin/finiquitos/{id}/print', [App\Http\Controllers\Admin\FiniquitoController::class, 'print'])->name('admin.finiquitos.print')->middleware('auth');
+
 
 require __DIR__.'/settings.php';
