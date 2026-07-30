@@ -93,7 +93,7 @@ Route::delete('/admin/permisos/{id}', [App\Http\Controllers\Admin\PermisoControl
 Route::patch('/admin/permisos/{id}/estado', [App\Http\Controllers\Admin\PermisoController::class, 'cambiarEstado'])->name('admin.permisos.estado')->middleware('auth');
 
 
-// Rutas para Finiquitos y Beneficios Sociales
+// Rutas para Finiquitos
 Route::get('/admin/finiquitos', [App\Http\Controllers\Admin\FiniquitoController::class, 'index'])->name('admin.finiquitos.index')->middleware('auth');
 Route::get('/admin/finiquitos/create', [App\Http\Controllers\Admin\FiniquitoController::class, 'create'])->name('admin.finiquitos.create')->middleware('auth');
 Route::post('/admin/finiquitos', [App\Http\Controllers\Admin\FiniquitoController::class, 'store'])->name('admin.finiquitos.store')->middleware('auth');
@@ -101,5 +101,28 @@ Route::get('/admin/finiquitos/{id}', [App\Http\Controllers\Admin\FiniquitoContro
 Route::delete('/admin/finiquitos/{id}', [App\Http\Controllers\Admin\FiniquitoController::class, 'destroy'])->name('admin.finiquitos.destroy')->middleware('auth');
 Route::get('/admin/finiquitos/{id}/print', [App\Http\Controllers\Admin\FiniquitoController::class, 'print'])->name('admin.finiquitos.print')->middleware('auth');
 
+// Rutas para Aguinaldos
+Route::get('/admin/aguinaldos', [App\Http\Controllers\Admin\AguinaldoController::class, 'index'])->name('admin.aguinaldos.index')->middleware('auth');
+Route::get('/admin/aguinaldos/create', [App\Http\Controllers\Admin\AguinaldoController::class, 'create'])->name('admin.aguinaldos.create')->middleware('auth');
+Route::post('/admin/aguinaldos', [App\Http\Controllers\Admin\AguinaldoController::class, 'store'])->name('admin.aguinaldos.store')->middleware('auth');
+Route::post('/admin/aguinaldos/calcular', [App\Http\Controllers\Admin\AguinaldoController::class, 'calcularMasivo'])->name('admin.aguinaldos.calcular')->middleware('auth');
+Route::get('/admin/aguinaldos/{id}/edit', [App\Http\Controllers\Admin\AguinaldoController::class, 'edit'])->name('admin.aguinaldos.edit')->middleware('auth');
+Route::put('/admin/aguinaldos/{id}', [App\Http\Controllers\Admin\AguinaldoController::class, 'update'])->name('admin.aguinaldos.update')->middleware('auth');
+Route::get('/admin/aguinaldos/{id}', [App\Http\Controllers\Admin\AguinaldoController::class, 'show'])->name('admin.aguinaldos.show')->middleware('auth');
+Route::delete('/admin/aguinaldos/{id}', [App\Http\Controllers\Admin\AguinaldoController::class, 'destroy'])->name('admin.aguinaldos.destroy')->middleware('auth');
+Route::get('/admin/aguinaldos/{id}/print', [App\Http\Controllers\Admin\AguinaldoController::class, 'print'])->name('admin.aguinaldos.print')->middleware('auth');
+Route::get('aguinaldos/print-general', [App\Http\Controllers\Admin\AguinaldoController::class, 'printGeneral'])->name('admin.aguinaldos.print.general')->middleware('auth');
 
+
+// Rutas para Retroactivos
+Route::get('/admin/retroactivos', [App\Http\Controllers\Admin\RetroactivoController::class, 'index'])->name('admin.retroactivos.index')->middleware('auth');
+Route::get('/admin/retroactivos/create', [App\Http\Controllers\Admin\RetroactivoController::class, 'create'])->name('admin.retroactivos.create')->middleware('auth');
+Route::post('/admin/retroactivos', [App\Http\Controllers\Admin\RetroactivoController::class, 'store'])->name('admin.retroactivos.store')->middleware('auth');
+Route::post('/admin/retroactivos/calcular', [App\Http\Controllers\Admin\RetroactivoController::class, 'calcularMasivo'])->name('admin.retroactivos.calcular')->middleware('auth');
+Route::get('/admin/retroactivos/{id}/edit', [App\Http\Controllers\Admin\RetroactivoController::class, 'edit'])->name('admin.retroactivos.edit')->middleware('auth');
+Route::put('/admin/retroactivos/{id}', [App\Http\Controllers\Admin\RetroactivoController::class, 'update'])->name('admin.retroactivos.update')->middleware('auth');
+Route::get('/admin/retroactivos/{id}', [App\Http\Controllers\Admin\RetroactivoController::class, 'show'])->name('admin.retroactivos.show')->middleware('auth');
+Route::delete('/admin/retroactivos/{id}', [App\Http\Controllers\Admin\RetroactivoController::class, 'destroy'])->name('admin.retroactivos.destroy')->middleware('auth');
+Route::get('/admin/retroactivos/{id}/print', [App\Http\Controllers\Admin\RetroactivoController::class, 'print'])->name('admin.retroactivos.print')->middleware('auth');
+Route::get('/admin/retroactivos/print-general', [App\Http\Controllers\Admin\RetroactivoController::class, 'printGeneral'])->name('admin.retroactivos.print.general')->middleware('auth');
 require __DIR__.'/settings.php';

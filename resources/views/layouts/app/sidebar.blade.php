@@ -60,6 +60,16 @@
                             Pagos
                         </flux:navlist.item>
 
+                        <!-- Enlace para Aguinaldos y Beneficios -->
+                        <flux:navlist.item icon="gift" :href="route('admin.aguinaldos.index')" :current="request()->routeIs('admin.aguinaldos*')">
+                            Aguinaldos
+                        </flux:navlist.item>
+
+                        <!-- Enlace para Retroactivos -->
+                        <flux:navlist.item icon="arrow-trending-up" :href="route('admin.retroactivos.index')" :current="request()->routeIs('admin.retroactivos*')">
+                            Retroactivos
+                        </flux:navlist.item>
+
                         <flux:navlist.item icon="document-text" :href="route('admin.finiquitos.index')" :current="request()->routeIs('admin.finiquitos*')">
                             Finiquitos
                         </flux:navlist.item>
