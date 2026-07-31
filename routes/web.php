@@ -119,10 +119,13 @@ Route::get('/admin/retroactivos', [App\Http\Controllers\Admin\RetroactivoControl
 Route::get('/admin/retroactivos/create', [App\Http\Controllers\Admin\RetroactivoController::class, 'create'])->name('admin.retroactivos.create')->middleware('auth');
 Route::post('/admin/retroactivos', [App\Http\Controllers\Admin\RetroactivoController::class, 'store'])->name('admin.retroactivos.store')->middleware('auth');
 Route::post('/admin/retroactivos/calcular', [App\Http\Controllers\Admin\RetroactivoController::class, 'calcularMasivo'])->name('admin.retroactivos.calcular')->middleware('auth');
+Route::get('/admin/retroactivos/print-general', [App\Http\Controllers\Admin\RetroactivoController::class, 'printGeneral'])->name('admin.retroactivos.print.general')->middleware('auth');
 Route::get('/admin/retroactivos/{id}/edit', [App\Http\Controllers\Admin\RetroactivoController::class, 'edit'])->name('admin.retroactivos.edit')->middleware('auth');
 Route::put('/admin/retroactivos/{id}', [App\Http\Controllers\Admin\RetroactivoController::class, 'update'])->name('admin.retroactivos.update')->middleware('auth');
 Route::get('/admin/retroactivos/{id}', [App\Http\Controllers\Admin\RetroactivoController::class, 'show'])->name('admin.retroactivos.show')->middleware('auth');
 Route::delete('/admin/retroactivos/{id}', [App\Http\Controllers\Admin\RetroactivoController::class, 'destroy'])->name('admin.retroactivos.destroy')->middleware('auth');
 Route::get('/admin/retroactivos/{id}/print', [App\Http\Controllers\Admin\RetroactivoController::class, 'print'])->name('admin.retroactivos.print')->middleware('auth');
-Route::get('/admin/retroactivos/print-general', [App\Http\Controllers\Admin\RetroactivoController::class, 'printGeneral'])->name('admin.retroactivos.print.general')->middleware('auth');
+
+
+
 require __DIR__.'/settings.php';

@@ -15,6 +15,7 @@ class Retroactivo extends Model
     protected $fillable = [
         'empleado_id',
         'gestion',
+        'porcentaje',
         'sueldo_anterior',
         'sueldo_nuevo',
         'diferencia_mensual',
@@ -25,9 +26,6 @@ class Retroactivo extends Model
         'observaciones',
     ];
 
-    /**
-     * Relación con el modelo Empleado.
-     */
     public function empleado(): BelongsTo
     {
         return $this->belongsTo(Empleado::class);

@@ -14,20 +14,17 @@ return new class extends Migration
         Schema::create('retroactivos', function (Blueprint $table) {
             $table->id();
             $table->foreignId('empleado_id')->constrained('empleados')->onDelete('cascade');
-
             // Gestión o año al que corresponde el retroactivo (ej. 2026)
             $table->year('gestion');
-
+            // Porcentaje de incremento salarial aplicado
+            $table->decimal('porcentaje', 5, 2)->default(0);
             // Sueldos de referencia
             $table->decimal('sueldo_anterior', 10, 2);
             $table->decimal('sueldo_nuevo', 10, 2);
-
             // Diferencia mensual calculada (Sueldo Nuevo - Sueldo Anterior)
             $table->decimal('diferencia_mensual', 10, 2);
-
-            // Cantidad de meses que abarca el retroactivo (ej. 1 a 5 meses)
+            // Cantidad de meses que abarca el retroactivo (ej. 1 a 12 meses)
             $table->integer('meses_aplicados')->default(1);
-
             // Monto Total Final a Pagar (Diferencia Mensual * Meses Aplicados)
             $table->decimal('monto_pagar', 10, 2);
             // Estado y fechas de control
