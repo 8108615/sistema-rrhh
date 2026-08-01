@@ -2,62 +2,62 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Planilla de Sueldos - {{ $planilla->mes }} {{ $planilla->anio }}</title>
     <style>
         body {
             font-family: Arial, sans-serif;
             color: #111;
             margin: 0;
-            padding: 20px;
-            font-size: 12px;
+            padding: 10px;
+            font-size: 11px;
         }
         .header {
             text-align: center;
-            margin-bottom: 25px;
+            margin-bottom: 20px;
             border-bottom: 2px solid #333;
-            padding-bottom: 15px;
+            padding-bottom: 10px;
         }
         .header h1 {
             margin: 0;
-            font-size: 20px;
+            font-size: 18px;
             text-transform: uppercase;
         }
         .header p {
             margin: 5px 0 0;
             color: #555;
-            font-size: 14px;
-        }
-        .info-box {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 20px;
-            background: #f9f9f9;
-            padding: 10px 15px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-        }
-        .info-box div {
             font-size: 13px;
         }
-        table {
+        /* Reemplazo de .info-box para compatibilidad total con Dompdf */
+        .info-table {
+            width: 100%;
+            margin-bottom: 15px;
+            background: #f9f9f9;
+            border: 1px solid #ddd;
+            border-collapse: collapse;
+        }
+        .info-table td {
+            padding: 8px 10px;
+            font-size: 12px;
+            border: none;
+        }
+        table.content-table {
             width: 100%;
             border-collapse: collapse;
             margin-top: 10px;
         }
-        th, td {
+        table.content-table th, table.content-table td {
             border: 1px solid #ccc;
-            padding: 8px 10px;
+            padding: 6px 8px;
             text-align: left;
         }
-        th {
+        table.content-table th {
             background-color: #f2f2f2;
             font-weight: bold;
-            font-size: 11px;
+            font-size: 10px;
             text-transform: uppercase;
         }
-        td {
-            font-size: 11px;
+        table.content-table td {
+            font-size: 10px;
         }
         .text-right {
             text-align: right;
@@ -65,63 +65,59 @@
         .text-center {
             text-align: center;
         }
+        /* Reemplazo del footer flex por tabla para alinear firmas en PDF */
         .footer {
             margin-top: 40px;
-            display: flex;
-            justify-content: space-between;
+            width: 100%;
+        }
+        .signature-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .signature-table td {
+            width: 50%;
             text-align: center;
+            border: none;
         }
         .signature-line {
             width: 200px;
+            margin: 0 auto;
             border-top: 1px solid #333;
-            margin-top: 50px;
             padding-top: 5px;
             font-size: 11px;
         }
-        @media print {
-            .no-print {
-                display: none;
-            }
-            body {
-                padding: 0;
-            }
-        }
     </style>
 </head>
-<body onload="window.print();">
+<body>
 
     @php
         $simboloMoneda = $ajuste->divisa ?? 'Bs.';
     @endphp
-
-    <!-- Botón flotante para reintentar impresión si es necesario -->
-    <div class="no-print" style="margin-bottom: 20px; text-align: right;">
-        <button onclick="window.print();" style="padding: 10px 20px; background: #0284c7; color: #fff; border: none; border-radius: 5px; cursor: pointer; font-weight: bold;">
-            Imprimir / Guardar PDF Nuevamente
-        </button>
-    </div>
 
     <div class="header">
         <h1>Reporte de Planilla de Sueldos y Salarios</h1>
         <p>Periodo: <strong>{{ $planilla->mes }} de {{ $planilla->anio }}</strong></p>
     </div>
 
-    <div class="info-box">
-        <div><strong>Estado de la Planilla:</strong> {{ $planilla->estado }}</div>
-        <div><strong>Total Empleados:</strong> {{ $planilla->detalles->count() }}</div>
-        <div><strong>Monto Total General:</strong> {{ number_format($planilla->total_pagado, 2, ',', '.') }} {{ $simboloMoneda }}</div>
-    </div>
+    <!-- Caja de información (Optimizada para Dompdf) -->
+    <table class="info-table">
+        <tr>
+            <td><strong>Estado:</strong> {{ $planilla->estado }}</td>
+            <td><strong>Total Empleados:</strong> {{ $planilla->detalles->count() }}</td>
+            <td class="text-right"><strong>Monto Total:</strong> {{ number_format($planilla->total_pagado, 2, ',', '.') }} {{ $simboloMoneda }}</td>
+        </tr>
+    </table>
 
-    <table>
+    <table class="content-table">
         <thead>
             <tr>
-                <th>N°</th>
+                <th style="width: 25px;" class="text-center">N°</th>
                 <th>Empleado</th>
                 <th>Cédula de Identidad (CI)</th>
                 <th>Cargo / Departamento</th>
                 <th class="text-right">Salario Base</th>
                 <th class="text-right">Bonos</th>
-                <th class="text-right">Descuento AFP (12.71%)</th>
+                <th class="text-right">Descuentos</th>
                 <th class="text-right">Líquido Pagable</th>
             </tr>
         </thead>
@@ -142,18 +138,23 @@
         <tfoot>
             <tr style="background-color: #f9f9f9; font-weight: bold;">
                 <td colspan="4" class="text-right">TOTAL GENERAL:</td>
-                <td colspan="4" class="text-right" style="font-size: 13px;">{{ number_format($planilla->total_pagado, 2, ',', '.') }} {{ $simboloMoneda }}</td>
+                <td colspan="4" class="text-right" style="font-size: 12px;">{{ number_format($planilla->total_pagado, 2, ',', '.') }} {{ $simboloMoneda }}</td>
             </tr>
         </tfoot>
     </table>
 
+    <!-- Firmas institucionales (Optimizadas para Dompdf) -->
     <div class="footer">
-        <div>
-            <div class="signature-line">Elaborado por (RRHH)</div>
-        </div>
-        <div>
-            <div class="signature-line">Aprobado por (Gerencia / Administración)</div>
-        </div>
+        <table class="signature-table">
+            <tr>
+                <td>
+                    <div class="signature-line">Elaborado por (RRHH)</div>
+                </td>
+                <td>
+                    <div class="signature-line">Aprobado por (Gerencia)</div>
+                </td>
+            </tr>
+        </table>
     </div>
 
 </body>

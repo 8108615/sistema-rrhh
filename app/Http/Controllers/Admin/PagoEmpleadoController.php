@@ -7,6 +7,7 @@ use App\Models\PagoEmpleado;
 use App\Models\Empleado;
 use App\Models\Ajuste;
 use Illuminate\Http\Request;
+use Barryvdh\DomPDF\Facade\Pdf
 
 class PagoEmpleadoController extends Controller
 {
@@ -172,10 +173,17 @@ class PagoEmpleadoController extends Controller
 
     public function print($id)
     {
-        $pago = PagoEmpleado::with(['empleado.area'])->findOrFail($id);
+        $pago = PagoEmpleado::with(['empleado.area', 'empleado.departamento'])->findOrFail($id);
         $ajuste = Ajuste::first();
         $simboloMoneda = $ajuste->divisa ?? 'Bs.';
 
-        return view('admin.pagos.print', compact('pago', 'ajuste', 'simboloMoneda'));
+        // Generamos el PDF utilizando Dompdf
+        $pdf = Pdf::loadView('admin.pagos.print', compact('pago', 'ajuste', 'simboloMoneda'));
+
+        // Configuramos tamaño carta en formato vertical ('portrait')
+        $pdf->setPaper('letter', 'portrait');
+
+        // Muestra el comprobante directamente en el navegador (puedes cambiar 'stream' por 'download' si prefieres descarga directa)
+        return $pdf->stream('comprobante-pago-' . $pago->id . '.pdf');
     }
 }

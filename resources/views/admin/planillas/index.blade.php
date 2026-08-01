@@ -57,6 +57,7 @@
                     <tr class="border-b border-gray-200 dark:border-zinc-700 bg-gray-50 dark:bg-zinc-900/50 text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
                         <th class="py-3.5 px-6">NRO</th>
                         <th class="py-3.5 px-6">Mes y Año</th>
+                        <th class="py-3.5 px-6">Nro. Empleados</th>
                         <th class="py-3.5 px-6">Total Pagado</th>
                         <th class="py-3.5 px-6">Estado</th>
                         <th class="py-3.5 px-6 text-center">Acciones</th>
@@ -70,6 +71,11 @@
                             </td>
                             <td class="py-4 px-6 font-semibold text-gray-900 dark:text-white">
                                 {{ $planilla->mes }} de {{ $planilla->anio }}
+                            </td>
+                            <td class="py-4 px-6 text-gray-600 dark:text-gray-400">
+                                <span class="px-2.5 py-1 bg-gray-100 dark:bg-zinc-700 rounded-md text-xs font-medium">
+                                    {{ $planilla->detalles_count ?? $planilla->detalles->count() }} emp.
+                                </span>
                             </td>
                             <td class="py-4 px-6 font-semibold text-emerald-600 dark:text-emerald-400">
                                 {{ number_format($planilla->total_pagado, 2, ',', '.') }} {{ $simboloMoneda }}
@@ -114,7 +120,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="5" class="py-8 text-center text-gray-500 dark:text-gray-400">
+                            <td colspan="6" class="py-8 text-center text-gray-500 dark:text-gray-400">
                                 No se encontraron registros de planillas.
                             </td>
                         </tr>

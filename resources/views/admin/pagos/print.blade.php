@@ -104,7 +104,7 @@
 </head>
 <body>
 
-    <!-- Botón flotante para activar impresión rápida -->
+    <!-- Botón flotante para activar impresión rápida en navegador -->
     <div class="no-print" style="text-align: right; max-width: 700px; margin: 0 auto 15px auto;">
         <button onclick="window.print()" style="padding: 8px 16px; background: #2563eb; color: #fff; border: none; border-radius: 5px; cursor: pointer; font-weight: bold;">
             🖨️ Imprimir Boleta
@@ -116,10 +116,9 @@
         <table class="header-table">
             <tr>
                 <td style="width: 20%;">
-                    @if(!empty($ajuste->logo))
-                        <img src="{{ asset('storage/' . $ajuste->logo) }}" alt="Logo Empresa" class="logo-img">
+                    @if(!empty($ajuste->logo) && file_exists(public_path('storage/' . $ajuste->logo)))
+                        <img src="{{ public_path('storage/' . $ajuste->logo) }}" alt="Logo Empresa" class="logo-img">
                     @else
-                        <!-- Logo por defecto si no está cargado -->
                         <div style="font-weight: bold; font-size: 14px;">{{ $ajuste->nombre ?? 'EMPRESA' }}</div>
                     @endif
                 </td>
@@ -159,7 +158,7 @@
             </tr>
         </table>
 
-        <!-- Tabla de Ingresos y Descuentos (Diseño de Doble Columna exacto) -->
+        <!-- Tabla de Ingresos y Descuentos adaptada para Dompdf -->
         <table class="seccion-tabla">
             <thead>
                 <tr>
@@ -169,15 +168,37 @@
             </thead>
             <tbody>
                 <tr>
-                    <td>
-                        SUELDO: <span style="float: right;">{{ number_format($pago->salario_base, 2, '.', ',') }}</span><br>
-                        BONOS: <span style="float: right;">{{ number_format($pago->bonos, 2, '.', ',') }}</span><br>
-                        OTROS: <span style="float: right;">0.00</span>
+                    <td style="padding: 0;">
+                        <table style="width: 100%; border-collapse: collapse;">
+                            <tr>
+                                <td style="padding: 5px 8px; border: none;">SUELDO:</td>
+                                <td style="padding: 5px 8px; border: none; text-align: right;">{{ number_format($pago->salario_base, 2, '.', ',') }}</td>
+                            </tr>
+                            <tr>
+                                <td style="padding: 5px 8px; border: none;">BONOS:</td>
+                                <td style="padding: 5px 8px; border: none; text-align: right;">{{ number_format($pago->bonos, 2, '.', ',') }}</td>
+                            </tr>
+                            <tr>
+                                <td style="padding: 5px 8px; border: none;">OTROS:</td>
+                                <td style="padding: 5px 8px; border: none; text-align: right;">0.00</td>
+                            </tr>
+                        </table>
                     </td>
-                    <td>
-                        ANTICIPOS: <span style="float: right;">{{ number_format($pago->anticipos, 2, '.', ',') }}</span><br>
-                        AFP.: <span style="float: right;">{{ number_format($pago->descuento_afp, 2, '.', ',') }}</span><br>
-                        OTROS / RC-IVA: <span style="float: right;">{{ number_format($pago->otros_descuentos, 2, '.', ',') }}</span>
+                    <td style="padding: 0;">
+                        <table style="width: 100%; border-collapse: collapse;">
+                            <tr>
+                                <td style="padding: 5px 8px; border: none;">ANTICIPOS:</td>
+                                <td style="padding: 5px 8px; border: none; text-align: right;">{{ number_format($pago->anticipos, 2, '.', ',') }}</td>
+                            </tr>
+                            <tr>
+                                <td style="padding: 5px 8px; border: none;">AFP.:</td>
+                                <td style="padding: 5px 8px; border: none; text-align: right;">{{ number_format($pago->descuento_afp, 2, '.', ',') }}</td>
+                            </tr>
+                            <tr>
+                                <td style="padding: 5px 8px; border: none;">OTROS / RC-IVA:</td>
+                                <td style="padding: 5px 8px; border: none; text-align: right;">{{ number_format($pago->otros_descuentos, 2, '.', ',') }}</td>
+                            </tr>
+                        </table>
                     </td>
                 </tr>
                 @php

@@ -46,6 +46,10 @@
                             Empleados
                         </flux:navlist.item>
 
+                        <flux:navlist.item icon="document-duplicate" :href="route('admin.contratos.index')" :current="request()->routeIs('admin.contratos*')">
+                            Contratos
+                        </flux:navlist.item>
+
                         <flux:navlist.item icon="calendar" :href="route('admin.permisos.index')" :current="request()->routeIs('admin.permisos*')">
                             Permisos y Vacaciones
                         </flux:navlist.item>

@@ -128,6 +128,6 @@
     </div>
 
     @if ($pagos->hasPages())
-        <div class="mt-4">{{ $pagos->links() }}</div>
+        <div class="mt-4">{{ $pagos->appends(['buscar' => $buscar])->links() }}</div>
     @endif
 </x-layouts::app>

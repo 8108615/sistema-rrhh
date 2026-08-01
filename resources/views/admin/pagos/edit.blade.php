@@ -26,9 +26,9 @@
                         <select name="empleado_id" id="empleado_id" class="w-full rounded-lg border-gray-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-gray-800 dark:text-zinc-200 px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500" required>
                             <option value="">-- Seleccione un empleado --</option>
                             @foreach ($empleados as $empleado)
-                                <option value="{{ $empleado->id }}" 
-                                        data-salario="{{ $empleado->salario ?? 0 }}" 
-                                        data-area="{{ $empleado->area->nombre ?? 'Sin área asignada' }}" 
+                                <option value="{{ $empleado->id }}"
+                                        data-salario="{{ $empleado->salario ?? 0 }}"
+                                        data-area="{{ $empleado->area->nombre ?? 'Sin área asignada' }}"
                                         {{ (old('empleado_id', $pago->empleado_id) == $empleado->id) ? 'selected' : '' }}>
                                     {{ $empleado->nombre }} {{ $empleado->apellido }} (CI: {{ $empleado->ci }})
                                 </option>
@@ -42,7 +42,7 @@
                 <div>
                     <flux:field>
                         <flux:label>Área de Trabajo</flux:label>
-                        <flux:input id="txt_area_empleado" type="text" value="Sin área asignada" readonly class="bg-gray-50 dark:bg-zinc-900 text-gray-500" />
+                        <input id="txt_area_empleado" type="text" value="Sin área asignada" readonly class="w-full rounded-lg border border-gray-300 dark:border-zinc-700 bg-gray-50 dark:bg-zinc-900 text-gray-500 dark:text-zinc-400 px-3 py-2 text-sm cursor-not-allowed" />
                     </flux:field>
                 </div>
             </div>

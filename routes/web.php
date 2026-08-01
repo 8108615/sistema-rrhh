@@ -126,6 +126,16 @@ Route::get('/admin/retroactivos/{id}', [App\Http\Controllers\Admin\RetroactivoCo
 Route::delete('/admin/retroactivos/{id}', [App\Http\Controllers\Admin\RetroactivoController::class, 'destroy'])->name('admin.retroactivos.destroy')->middleware('auth');
 Route::get('/admin/retroactivos/{id}/print', [App\Http\Controllers\Admin\RetroactivoController::class, 'print'])->name('admin.retroactivos.print')->middleware('auth');
 
+// Rutas para Contratos
+Route::get('/admin/contratos', [App\Http\Controllers\Admin\ContratoController::class, 'index'])->name('admin.contratos.index')->middleware('auth');
+Route::get('/admin/contratos/create', [App\Http\Controllers\Admin\ContratoController::class, 'create'])->name('admin.contratos.create')->middleware('auth');
+Route::post('/admin/contratos', [App\Http\Controllers\Admin\ContratoController::class, 'store'])->name('admin.contratos.store')->middleware('auth');
+Route::get('/admin/contratos/{id}/edit', [App\Http\Controllers\Admin\ContratoController::class, 'edit'])->name('admin.contratos.edit')->middleware('auth');
+Route::put('/admin/contratos/{id}', [App\Http\Controllers\Admin\ContratoController::class, 'update'])->name('admin.contratos.update')->middleware('auth');
+Route::get('/admin/contratos/{id}', [App\Http\Controllers\Admin\ContratoController::class, 'show'])->name('admin.contratos.show')->middleware('auth');
+Route::delete('/admin/contratos/{id}', [App\Http\Controllers\Admin\ContratoController::class, 'destroy'])->name('admin.contratos.destroy')->middleware('auth');
+Route::get('/admin/contratos/{id}/imprimir', [App\Http\Controllers\Admin\ContratoController::class, 'imprimir'])->name('admin.contratos.imprimir')->middleware('auth');
+
 
 
 require __DIR__.'/settings.php';

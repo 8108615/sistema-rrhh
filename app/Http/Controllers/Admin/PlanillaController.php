@@ -9,6 +9,7 @@ use App\Models\Empleado;
 use App\Models\Ajuste;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class PlanillaController extends Controller
 {
@@ -119,11 +120,19 @@ class PlanillaController extends Controller
 
     public function pdf($id)
     {
-        $planilla = Planilla::with('detalles.empleado')->findOrFail($id);
+        // Cargamos la planilla con sus detalles, empleado y el departamento del empleado
+        $planilla = Planilla::with('detalles.empleado.departamento')->findOrFail($id);
         $ajuste = Ajuste::first();
 
-        // tu lógica de PDF...
-        return view('admin.planillas.pdf', compact('planilla', 'ajuste'));
+        // Generamos el PDF utilizando la vista
+        $pdf = Pdf::loadView('admin.planillas.pdf', compact('planilla', 'ajuste'));
+
+        // Opcional: configurar tamaño carta y orientación horizontal ('landscape') si la tabla es muy ancha,
+        // o 'portrait' (vertical) si prefieres.
+        $pdf->setPaper('letter', 'portrait');
+
+        // Muestra el PDF directamente en el navegador (puedes cambiar 'stream' por 'download' si prefieres que se descargue)
+        return $pdf->stream('planilla-' . $planilla->mes . '-' . $planilla->anio . '.pdf');
     }
     public function marcarComoPagado(Planilla $planilla)
     {
