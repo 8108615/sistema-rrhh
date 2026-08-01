@@ -4,7 +4,7 @@
         <div class="flex items-center justify-between">
             <div>
                 <h1 class="text-2xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100">Registrar Nuevo Contrato</h1>
-                <p class="text-sm text-zinc-500 dark:text-zinc-400">Completa los datos del contrato laboral y adjunta el documento escaneado.</p>
+                <p class="text-sm text-zinc-500 dark:text-zinc-400">Selecciona el empleado para autocompletar los datos y completa la información del contrato.</p>
             </div>
             <div>
                 <flux:button variant="ghost" href="{{ route('admin.contratos.index') }}" icon="arrow-left">
@@ -27,15 +27,20 @@
 
         <!-- Formulario -->
         <div class="bg-white dark:bg-zinc-900 p-6 rounded-xl border border-zinc-200 dark:border-zinc-800 shadow-sm">
-            <form action="{{ route('admin.contratos.store') }}" method="POST" enctype="multipart/form-data" class="space-y-6">
+            <form action="{{ route('admin.contratos.store') }}" method="POST" class="space-y-6">
                 @csrf
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <!-- Empleado -->
                     <div class="md:col-span-2">
-                        <flux:select name="empleado_id" label="Empleado" placeholder="Selecciona un empleado..." required>
+                        <flux:select id="empleado_id" name="empleado_id" label="Empleado" placeholder="Selecciona un empleado..." required>
+                            <option value="">Selecciona un empleado...</option>
                             @foreach ($empleados as $empleado)
-                                <option value="{{ $empleado->id }}" {{ old('empleado_id') == $empleado->id ? 'selected' : '' }}>
+                                <option value="{{ $empleado->id }}" 
+                                    data-fecha="{{ $empleado->fecha_ingreso }}" 
+                                    data-salario="{{ $empleado->salario }}" 
+                                    data-area="{{ optional($empleado->area)->nombre }}"
+                                    {{ old('empleado_id') == $empleado->id ? 'selected' : '' }}>
                                     {{ $empleado->nombre }} {{ $empleado->apellido }} - CI: {{ $empleado->ci }}
                                 </option>
                             @endforeach
@@ -45,16 +50,18 @@
                     <!-- Tipo de Contrato -->
                     <div>
                         <flux:select name="tipo_contrato" label="Tipo de Contrato" placeholder="Selecciona el tipo..." required>
-                            <option value="Plazo Fijo" {{ old('tipo_contrato') == 'Plazo Fijo' ? 'selected' : '' }}>Plazo Fijo</option>
                             <option value="Indefinido" {{ old('tipo_contrato') == 'Indefinido' ? 'selected' : '' }}>Indefinido</option>
-                            <option value="Realización de Labor Determinada" {{ old('tipo_contrato') == 'Realización de Labor Determinada' ? 'selected' : '' }}>Realización de Labor Determinada</option>
-                            <option value="Consultoría" {{ old('tipo_contrato') == 'Consultoría' ? 'selected' : '' }}>Consultoría</option>
+                            <option value="Plazo Fijo" {{ old('tipo_contrato') == 'Plazo Fijo' ? 'selected' : '' }}>Plazo Fijo</option>
+                            <option value="Consultoría por Producto" {{ old('tipo_contrato') == 'Consultoría por Producto' ? 'selected' : '' }}>Consultoría por Producto</option>
+                            <option value="Consultoría en Línea" {{ old('tipo_contrato') == 'Consultoría en Línea' ? 'selected' : '' }}>Consultoría en Línea</option>
+                            <option value="Pasantía" {{ old('tipo_contrato') == 'Pasantía' ? 'selected' : '' }}>Pasantía</option>
                         </flux:select>
                     </div>
 
                     <!-- Cargo del Contrato -->
                     <div>
-                        <flux:select name="cargo_contrato" label="Cargo / Área del Contrato" placeholder="Selecciona un área..." required>
+                        <flux:select id="cargo_contrato" name="cargo_contrato" label="Cargo / Área del Contrato" placeholder="Selecciona un área..." required>
+                            <option value="">Selecciona un área...</option>
                             @foreach ($areas as $area)
                                 <option value="{{ $area->nombre }}" {{ old('cargo_contrato') == $area->nombre ? 'selected' : '' }}>
                                     {{ $area->nombre }}
@@ -65,7 +72,7 @@
 
                     <!-- Fecha de Inicio -->
                     <div>
-                        <flux:input type="date" name="fecha_inicio" label="Fecha de Inicio" value="{{ old('fecha_inicio') }}" required />
+                        <flux:input type="date" id="fecha_inicio" name="fecha_inicio" label="Fecha de Inicio" value="{{ old('fecha_inicio') }}" required />
                     </div>
 
                     <!-- Fecha de Fin -->
@@ -75,21 +82,17 @@
 
                     <!-- Salario Mensual -->
                     <div>
-                        <flux:input type="number" step="0.01" min="0" name="salario_mensual" label="Salario Mensual (Bs.)" value="{{ old('salario_mensual') }}" placeholder="4455.78" required />
+                        <flux:input type="number" step="0.01" min="0" id="salario_mensual" name="salario_mensual" label="Salario Mensual (Bs.)" value="{{ old('salario_mensual') }}" placeholder="0.00" required />
                     </div>
 
                     <!-- Estado -->
                     <div>
                         <flux:select name="estado" label="Estado del Contrato" required>
                             <option value="Activo" {{ old('estado', 'Activo') == 'Activo' ? 'selected' : '' }}>Activo</option>
+                            <option value="Vencido" {{ old('estado') == 'Vencido' ? 'selected' : '' }}>Vencido</option>
                             <option value="Finalizado" {{ old('estado') == 'Finalizado' ? 'selected' : '' }}>Finalizado</option>
-                            <option value="Cancelado" {{ old('estado') == 'Cancelado' ? 'selected' : '' }}>Cancelado</option>
+                            <option value="Anulado" {{ old('estado') == 'Anulado' ? 'selected' : '' }}>Anulado</option>
                         </flux:select>
-                    </div>
-
-                    <!-- Archivo PDF -->
-                    <div class="md:col-span-2">
-                        <flux:input type="file" name="archivo_pdf" label="Documento PDF del Contrato" accept="application/pdf" description="Sube el documento escaneado firmado (Máx. 5MB)." />
                     </div>
 
                     <!-- Observaciones -->
@@ -106,4 +109,66 @@
             </form>
         </div>
     </div>
+
+    <!-- Script para autocompletar datos del empleado seleccionado -->
+    <!-- Script para autocompletar datos del empleado seleccionado -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const empleadoSelect = document.querySelector('#empleado_id');
+            
+            // Si usas Livewire o Alpine dentro de Flux, escuchamos el cambio
+            document.addEventListener('change', function (e) {
+                if (e.target && e.target.id === 'empleado_id') {
+                    actualizarDatosEmpleado(e.target);
+                }
+            });
+
+            // Por si acaso el componente emite un evento personalizado o cambia directamente
+            const selectElement = document.querySelector('select[name="empleado_id"]');
+            if (selectElement) {
+                selectElement.addEventListener('change', function () {
+                    actualizarDatosEmpleado(this);
+                });
+            }
+
+            function actualizarDatosEmpleado(select) {
+                const selectedOption = select.options ? select.options[select.selectedIndex] : null;
+                
+                if (selectedOption && selectedOption.value) {
+                    const fechaIngreso = selectedOption.getAttribute('data-fecha');
+                    const salario = selectedOption.getAttribute('data-salario');
+                    const areaNombre = selectedOption.getAttribute('data-area');
+
+                    // Asignar Fecha de Inicio
+                    if (fechaIngreso) {
+                        const fechaInput = document.querySelector('input[name="fecha_inicio"]');
+                        if (fechaInput) {
+                            fechaInput.value = fechaIngreso;
+                            fechaInput.dispatchEvent(new Event('input', { bubbles: true }));
+                            fechaInput.dispatchEvent(new Event('change', { bubbles: true }));
+                        }
+                    }
+
+                    // Asignar Salario
+                    if (salario) {
+                        const salarioInput = document.querySelector('input[name="salario_mensual"]');
+                        if (salarioInput) {
+                            salarioInput.value = salario;
+                            salarioInput.dispatchEvent(new Event('input', { bubbles: true }));
+                            salarioInput.dispatchEvent(new Event('change', { bubbles: true }));
+                        }
+                    }
+
+                    // Asignar Cargo / Área
+                    if (areaNombre) {
+                        const cargoSelect = document.querySelector('select[name="cargo_contrato"]');
+                        if (cargoSelect) {
+                            cargoSelect.value = areaNombre;
+                            cargoSelect.dispatchEvent(new Event('change', { bubbles: true }));
+                        }
+                    }
+                }
+            }
+        });
+    </script>
 </x-layouts::app>

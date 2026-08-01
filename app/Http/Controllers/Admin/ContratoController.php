@@ -7,6 +7,7 @@ use App\Models\Contrato;
 use App\Models\Empleado;
 use Illuminate\Http\Request;
 use App\Models\Area;
+use App\Models\Ajuste;
 use Illuminate\Support\Facades\Storage;
 
 class ContratoController extends Controller
@@ -71,8 +72,9 @@ class ContratoController extends Controller
         $contrato = Contrato::create($validated);
 
         // Redirigir directamente a la vista de impresión del contrato generado
-        return redirect()->route('admin.contratos.imprimir', $contrato->id)
-                        ->with('success', 'Contrato registrado con éxito. Ya puedes imprimirlo.');
+        return redirect()->route('admin.contratos.index', $contrato->id)
+                        ->with('mensaje', 'Contrato registrado con éxito. Ya puedes imprimirlo.')
+                        ->with('icono', 'success');
     }
 
     /**
@@ -130,7 +132,9 @@ class ContratoController extends Controller
 
         $contrato->update($data);
 
-        return redirect()->route('admin.contratos.index')->with('success', 'Contrato actualizado exitosamente.');
+        return redirect()->route('admin.contratos.index')
+                ->with('mensaje', 'Contrato actualizado exitosamente.')
+                ->with('icono', 'success');
     }
 
     /**
@@ -147,7 +151,9 @@ class ContratoController extends Controller
 
         $contrato->delete();
 
-        return redirect()->route('admin.contratos.index')->with('success', 'Contrato eliminado correctamente.');
+        return redirect()->route('admin.contratos.index')
+                ->with('mensaje', 'Contrato eliminado correctamente.')
+                ->with('icono', 'success');
     }
 
     /**
@@ -162,5 +168,13 @@ class ContratoController extends Controller
         }
 
         return Storage::disk('public')->download($contrato->archivo_pdf);
+    }
+
+    public function imprimir($id)
+    {
+        $contrato = Contrato::with(['empleado'])->findOrFail($id);
+        $ajuste = Ajuste::first(); 
+        
+        return view('admin.contratos.documento-impresion', compact('contrato', 'ajuste'));
     }
 }

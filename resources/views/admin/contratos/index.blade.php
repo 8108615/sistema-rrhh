@@ -60,7 +60,7 @@
                             <th class="py-3 px-4">Vigencia</th>
                             <th class="py-3 px-4">Salario</th>
                             <th class="py-3 px-4">Estado</th>
-                            <th class="py-3 px-4">Documento PDF</th>
+                            <th class="py-3 px-4">Imprimir</th>
                             <th class="py-3 px-4 text-right">Acciones</th>
                         </tr>
                     </thead>
@@ -93,13 +93,9 @@
                                     <flux:badge variant="{{ $badgeVariant }}" size="sm">{{ $contrato->estado }}</flux:badge>
                                 </td>
                                 <td class="py-3 px-4">
-                                    @if($contrato->archivo_pdf)
-                                        <flux:button variant="ghost" size="sm" href="{{ route('admin.contratos.download', $contrato->id) }}" icon="document-arrow-down" target="_blank">
-                                            Ver PDF
-                                        </flux:button>
-                                    @else
-                                        <span class="text-xs text-zinc-400 italic">Sin archivo</span>
-                                    @endif
+                                    <flux:button variant="ghost" size="sm" href="{{ route('admin.contratos.imprimir', $contrato->id) }}" icon="printer" target="_blank">
+                                        Ver Contrato
+                                    </flux:button>
                                 </td>
                                 <td class="py-3 px-4 text-right">
                                     <div class="flex items-center justify-end gap-2">

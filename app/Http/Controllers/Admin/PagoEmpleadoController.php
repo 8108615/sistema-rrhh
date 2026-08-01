@@ -7,7 +7,7 @@ use App\Models\PagoEmpleado;
 use App\Models\Empleado;
 use App\Models\Ajuste;
 use Illuminate\Http\Request;
-use Barryvdh\DomPDF\Facade\Pdf
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class PagoEmpleadoController extends Controller
 {
