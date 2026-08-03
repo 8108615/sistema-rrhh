@@ -1,4 +1,16 @@
 <x-layouts::app title="Contratos">
+    @php
+        $ajusteDivisa = \App\Models\Ajuste::first()->divisas ?? 'BOB';
+        $jsonPath = public_path('divisas.json');
+        $simboloMoneda = $ajusteDivisa;
+        if (file_exists($jsonPath)) {
+            $divisasData = json_decode(file_get_contents($jsonPath), true);
+            if (isset($divisasData[$ajusteDivisa]['symbol'])) {
+                $simboloMoneda = $divisasData[$ajusteDivisa]['symbol'];
+            }
+        }
+    @endphp
+
     <div class="space-y-6">
         <!-- Cabecera de la sección -->
         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -80,8 +92,8 @@
                                     <div><span class="font-semibold">Inicio:</span> {{ \Carbon\Carbon::parse($contrato->fecha_inicio)->format('d/m/Y') }}</div>
                                     <div><span class="font-semibold">Fin:</span> {{ $contrato->fecha_fin ? \Carbon\Carbon::parse($contrato->fecha_fin)->format('d/m/Y') : 'Indefinido / Labor determinada' }}</div>
                                 </td>
-                                <td class="py-3 px-4 font-medium">
-                                    Bs. {{ number_format($contrato->salario_mensual, 2, ',', '.') }}
+                                <td class="py-3 px-4 font-medium font-mono">
+                                    {{ $simboloMoneda }} {{ number_format($contrato->salario_mensual, 2, ',', '.') }}
                                 </td>
                                 <td class="py-3 px-4">
                                     @php

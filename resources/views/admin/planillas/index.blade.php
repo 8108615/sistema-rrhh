@@ -8,11 +8,14 @@
             <flux:heading size="xl" level="1">Planillas de Sueldos</flux:heading>
             <flux:subheading>Historial y control de pagos de sueldos al personal.</flux:subheading>
         </div>
-        <div>
-            <a href="{{ route('admin.planillas.create') }}">
-                <flux:button variant="primary" icon="plus">Generar Planilla</flux:button>
-            </a>
-        </div>
+        <!-- Botón para redireccionar a la vista de creación protegido -->
+        @can('admin.planillas.create')
+            <div>
+                <a href="{{ route('admin.planillas.create') }}">
+                    <flux:button variant="primary" icon="plus">Generar Planilla</flux:button>
+                </a>
+            </div>
+        @endcan
     </div>
 
     <flux:separator variant="subtle" class="mb-6" />
@@ -88,34 +91,85 @@
                                 @endif
                             </td>
                             <td class="py-4 px-6 text-center space-x-2">
-                                <!-- Botón Pagar (Solo si está pendiente) -->
-                                @if ($planilla->estado != 'Pagado')
-                                    <form action="{{ route('admin.planillas.pagar', $planilla->id) }}" method="POST" class="inline-block pagar-form">
-                                        @csrf
-                                        @method('PATCH')
-                                        <button type="submit" class="inline-flex items-center px-3 py-1.5 bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-medium rounded-md shadow-sm transition cursor-pointer">
-                                            <i class="fas fa-check-circle mr-1.5"></i> Pagar
-                                        </button>
-                                    </form>
-                                @endif
-                                <!-- Botón Ver Detalle -->
-                                <a href="{{ route('admin.planillas.show', $planilla->id) }}" class="inline-flex items-center px-3 py-1.5 bg-sky-500 hover:bg-sky-600 text-white text-xs font-medium rounded-md shadow-sm transition">
-                                    <i class="fas fa-eye mr-1.5"></i> Ver
-                                </a>
+                                <div class="flex justify-center items-center gap-1.5">
+                                    <!-- Botón Pagar (Solo si está pendiente) protegido -->
+                                    @if ($planilla->estado != 'Pagado')
+                                        @can('admin.planillas.pagar')
+                                            <form action="{{ route('admin.planillas.pagar', $planilla->id) }}" method="POST" class="inline-block pagar-form" id="miFormularioPagarPlanilla{{ $planilla->id }}">
+                                                @csrf
+                                                @method('PATCH')
+                                                <button type="submit" class="inline-flex items-center px-3 py-1.5 bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-medium rounded-md shadow-sm transition cursor-pointer" onclick="preguntarPagarPlanilla{{ $planilla->id }}(event)">
+                                                    <i class="fas fa-check-circle mr-1.5"></i> Pagar
+                                                </button>
+                                            </form>
 
-                                <!-- Botón PDF / Imprimir -->
-                                <a href="{{ route('admin.planillas.pdf', $planilla->id) }}" target="_blank" class="inline-flex items-center px-3 py-1.5 bg-indigo-500 hover:bg-indigo-600 text-white text-xs font-medium rounded-md shadow-sm transition">
-                                    <i class="fas fa-print mr-1.5"></i> PDF
-                                </a>
+                                            <script>
+                                                function preguntarPagarPlanilla{{ $planilla->id }}(event) {
+                                                    event.preventDefault();
+                                                    Swal.fire({
+                                                        title: '¿Confirmar pago de planilla?',
+                                                        text: "Esta acción cambiará el estado de la planilla a 'Pagado'.",
+                                                        icon: 'question',
+                                                        showCancelButton: true,
+                                                        confirmButtonColor: '#10b981',
+                                                        cancelButtonColor: '#6b7280',
+                                                        confirmButtonText: 'Sí, marcar como pagado',
+                                                        cancelButtonText: 'Cancelar'
+                                                    }).then((result) => {
+                                                        if (result.isConfirmed) {
+                                                            document.getElementById('miFormularioPagarPlanilla{{ $planilla->id }}').submit();
+                                                        }
+                                                    });
+                                                }
+                                            </script>
+                                        @endcan
+                                    @endif
 
-                                <!-- Botón Eliminar -->
-                                <form action="{{ route('admin.planillas.destroy', $planilla->id) }}" method="POST" class="inline-block delete-form">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="inline-flex items-center px-3 py-1.5 bg-red-500 hover:bg-red-600 text-white text-xs font-medium rounded-md shadow-sm transition cursor-pointer delete-btn">
-                                        <i class="fas fa-trash-alt mr-1.5"></i> Eliminar
-                                    </button>
-                                </form>
+                                    <!-- Botón Ver Detalle protegido -->
+                                    @can('admin.planillas.show')
+                                        <a href="{{ route('admin.planillas.show', $planilla->id) }}" class="inline-flex items-center px-3 py-1.5 bg-sky-500 hover:bg-sky-600 text-white text-xs font-medium rounded-md shadow-sm transition">
+                                            <i class="fas fa-eye mr-1.5"></i> Ver
+                                        </a>
+                                    @endcan
+
+                                    <!-- Botón PDF / Imprimir protegido -->
+                                    @can('admin.planillas.pdf')
+                                        <a href="{{ route('admin.planillas.pdf', $planilla->id) }}" target="_blank" class="inline-flex items-center px-3 py-1.5 bg-indigo-500 hover:bg-indigo-600 text-white text-xs font-medium rounded-md shadow-sm transition">
+                                            <i class="fas fa-print mr-1.5"></i> PDF
+                                        </a>
+                                    @endcan
+
+                                    <!-- Botón Eliminar protegido -->
+                                    @can('admin.planillas.destroy')
+                                        <form action="{{ route('admin.planillas.destroy', $planilla->id) }}" method="POST" class="inline-block delete-form" id="miFormularioEliminarPlanilla{{ $planilla->id }}">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="inline-flex items-center px-3 py-1.5 bg-red-500 hover:bg-red-600 text-white text-xs font-medium rounded-md shadow-sm transition cursor-pointer delete-btn" onclick="preguntarEliminarPlanilla{{ $planilla->id }}(event)">
+                                                <i class="fas fa-trash-alt mr-1.5"></i> Eliminar
+                                            </button>
+                                        </form>
+
+                                        <script>
+                                            function preguntarEliminarPlanilla{{ $planilla->id }}(event) {
+                                                event.preventDefault();
+                                                Swal.fire({
+                                                    title: '¿Estás seguro?',
+                                                    text: "¡Esta acción eliminará la planilla y todos sus detalles asociados!",
+                                                    icon: 'warning',
+                                                    showCancelButton: true,
+                                                    confirmButtonColor: '#ef4444',
+                                                    cancelButtonColor: '#6b7280',
+                                                    confirmButtonText: 'Sí, eliminar',
+                                                    cancelButtonText: 'Cancelar'
+                                                }).then((result) => {
+                                                    if (result.isConfirmed) {
+                                                        document.getElementById('miFormularioEliminarPlanilla{{ $planilla->id }}').submit();
+                                                    }
+                                                });
+                                            }
+                                        </script>
+                                    @endcan
+                                </div>
                             </td>
                         </tr>
                     @empty
@@ -137,54 +191,16 @@
         @endif
     </div>
 
-    <!-- Script de confirmación con SweetAlert -->
-    @push('scripts')
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            // Confirmación para Eliminar
-            const deleteForms = document.querySelectorAll('.delete-form');
-            deleteForms.forEach(form => {
-                form.addEventListener('submit', function (e) {
-                    e.preventDefault();
-                    Swal.fire({
-                        title: '¿Estás seguro?',
-                        text: "¡Esta acción eliminará la planilla y todos sus detalles asociados!",
-                        icon: 'warning',
-                        showCancelButton: true,
-                        confirmButtonColor: '#ef4444',
-                        cancelButtonColor: '#6b7280',
-                        confirmButtonText: 'Sí, eliminar',
-                        cancelButtonText: 'Cancelar'
-                    }).then((result) => {
-                        if (result.isConfirmed) {
-                            form.submit();
-                        }
-                    });
-                });
+    @if (session('success'))
+        <script>
+            Swal.fire({
+                icon: 'success',
+                title: '¡Éxito!',
+                text: '{{ session('success') }}',
+                confirmButtonColor: '#3b82f6',
+                timer: 3000,
+                timerProgressBar: true
             });
-
-            // Confirmación para Pagar
-            const pagarForms = document.querySelectorAll('.pagar-form');
-            pagarForms.forEach(form => {
-                form.addEventListener('submit', function (e) {
-                    e.preventDefault();
-                    Swal.fire({
-                        title: '¿Confirmar pago de planilla?',
-                        text: "Esta acción cambiará el estado de la planilla a 'Pagado'.",
-                        icon: 'question',
-                        showCancelButton: true,
-                        confirmButtonColor: '#10b981',
-                        cancelButtonColor: '#6b7280',
-                        confirmButtonText: 'Sí, marcar como pagado',
-                        cancelButtonText: 'Cancelar'
-                    }).then((result) => {
-                        if (result.isConfirmed) {
-                            form.submit();
-                        }
-                    });
-                });
-            });
-        });
-    </script>
-    @endpush
+        </script>
+    @endif
 </x-layouts::app>

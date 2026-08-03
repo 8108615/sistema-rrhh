@@ -4,11 +4,14 @@
             <flux:heading size="xl" level="1">Permisos y Vacaciones</flux:heading>
             <flux:subheading>Historial de solicitudes del personal.</flux:subheading>
         </div>
-        <div>
-            <a href="{{ route('admin.permisos.create') }}">
-                <flux:button variant="primary" icon="plus" color="blue">Nuevo Permiso</flux:button>
-            </a>
-        </div>
+        <!-- Botón para redireccionar a la vista de creación protegido -->
+        @can('admin.permisos.create')
+            <div>
+                <a href="{{ route('admin.permisos.create') }}">
+                    <flux:button variant="primary" icon="plus" color="blue">Nuevo Permiso</flux:button>
+                </a>
+            </div>
+        @endcan
     </div>
 
     <!-- Buscador -->
@@ -87,38 +90,42 @@
                         </td>
                         <td class="px-4 py-3 border border-gray-200 dark:border-zinc-700">
                             <div class="flex justify-center items-center gap-1.5">
-                                <!-- Editar -->
-                                <a href="{{ route('admin.permisos.edit', $permiso->id) }}" class="px-3 py-1.5 bg-amber-500 hover:bg-amber-600 text-white text-xs font-medium rounded-md shadow-sm transition flex items-center">
-                                    <i class="fas fa-edit mr-1"></i> Editar
-                                </a>
+                                <!-- Editar protegido -->
+                                @can('admin.permisos.edit')
+                                    <a href="{{ route('admin.permisos.edit', $permiso->id) }}" class="px-3 py-1.5 bg-amber-500 hover:bg-amber-600 text-white text-xs font-medium rounded-md shadow-sm transition flex items-center">
+                                        <i class="fas fa-edit mr-1"></i> Editar
+                                    </a>
+                                @endcan
 
-                                <!-- Eliminar con confirmación de SweetAlert -->
-                                <form action="{{ route('admin.permisos.destroy', $permiso->id) }}" method="POST" class="inline-flex" id="formEliminarPermiso{{ $permiso->id }}">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="px-3 py-1.5 bg-red-500 hover:bg-red-600 text-white text-xs font-medium rounded-md shadow-sm transition cursor-pointer flex items-center" onclick="confirmarEliminacionPermiso{{ $permiso->id }}(event)">
-                                        <i class="fas fa-trash-alt mr-1"></i> Eliminar
-                                    </button>
-                                </form>
-                                <script>
-                                    function confirmarEliminacionPermiso{{ $permiso->id }}(e) {
-                                        e.preventDefault();
-                                        Swal.fire({
-                                            title: '¿Eliminar solicitud de permiso?',
-                                            text: "¡No podrás revertir esta acción!",
-                                            icon: 'warning',
-                                            showCancelButton: true,
-                                            confirmButtonColor: '#d33',
-                                            cancelButtonColor: '#3085d6',
-                                            confirmButtonText: 'Sí, eliminar',
-                                            cancelButtonText: 'Cancelar'
-                                        }).then((result) => {
-                                            if (result.isConfirmed) {
-                                                document.getElementById('formEliminarPermiso{{ $permiso->id }}').submit();
-                                            }
-                                        });
-                                    }
-                                </script>
+                                <!-- Eliminar protegido -->
+                                @can('admin.permisos.destroy')
+                                    <form action="{{ route('admin.permisos.destroy', $permiso->id) }}" method="POST" class="inline-flex" id="formEliminarPermiso{{ $permiso->id }}">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="px-3 py-1.5 bg-red-500 hover:bg-red-600 text-white text-xs font-medium rounded-md shadow-sm transition cursor-pointer flex items-center" onclick="confirmarEliminacionPermiso{{ $permiso->id }}(event)">
+                                            <i class="fas fa-trash-alt mr-1"></i> Eliminar
+                                        </button>
+                                    </form>
+                                    <script>
+                                        function confirmarEliminacionPermiso{{ $permiso->id }}(e) {
+                                            e.preventDefault();
+                                            Swal.fire({
+                                                title: '¿Eliminar solicitud de permiso?',
+                                                text: "¡No podrás revertir esta acción!",
+                                                icon: 'warning',
+                                                showCancelButton: true,
+                                                confirmButtonColor: '#d33',
+                                                cancelButtonColor: '#3085d6',
+                                                confirmButtonText: 'Sí, eliminar',
+                                                cancelButtonText: 'Cancelar'
+                                            }).then((result) => {
+                                                if (result.isConfirmed) {
+                                                    document.getElementById('formEliminarPermiso{{ $permiso->id }}').submit();
+                                                }
+                                            });
+                                        }
+                                    </script>
+                                @endcan
                             </div>
                         </td>
                     </tr>
@@ -132,6 +139,6 @@
     </div>
 
     @if ($permisos->hasPages())
-        <div class="mt-4">{{ $permisos->links() }}</div>
+        <div class="mt-4">{{ $permisos->appends(['buscar' => $buscar])->links() }}</div>
     @endif
 </x-layouts::app>

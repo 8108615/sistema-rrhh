@@ -63,16 +63,37 @@
             </div>
 
             <!-- Cumpleaños del Mes -->
-            <div class="bg-white dark:bg-zinc-900 p-5 rounded-xl border border-zinc-200 dark:border-zinc-800 shadow-sm flex items-center justify-between">
-                <div>
-                    <p class="text-xs font-medium uppercase tracking-wider text-zinc-500 dark:text-zinc-400">Cumpleaños (Mes)</p>
-                    <h3 class="text-3xl font-extrabold text-zinc-900 dark:text-zinc-100 mt-1">{{ $cumpleañeros ?? 0 }}</h3>
-                    <span class="text-xs text-pink-600 dark:text-pink-400 font-medium flex items-center gap-1 mt-1">
-                        ¡Felicitar al personal!
-                    </span>
+            <div class="bg-white dark:bg-zinc-900 p-5 rounded-xl border border-zinc-200 dark:border-zinc-800 shadow-sm flex flex-col justify-between">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-xs font-medium uppercase tracking-wider text-zinc-500 dark:text-zinc-400">Cumpleaños (Mes)</p>
+                        <h3 class="text-3xl font-extrabold text-zinc-900 dark:text-zinc-100 mt-1">{{ $cumpleañeros ?? 0 }}</h3>
+                    </div>
+                    <div class="p-3 bg-pink-50 dark:bg-pink-950/50 text-pink-600 dark:text-pink-400 rounded-full">
+                        <flux:icon.cake class="w-8 h-8" />
+                    </div>
                 </div>
-                <div class="p-3 bg-pink-50 dark:bg-pink-950/50 text-pink-600 dark:text-pink-400 rounded-full">
-                    <flux:icon.cake class="w-8 h-8" />
+
+                <!-- Listado de nombres de los cumpleañeros -->
+                <div class="mt-3 pt-3 border-t border-zinc-100 dark:border-zinc-800/60">
+                    @if(isset($listaCumpleañeros) && $listaCumpleañeros->count() > 0)
+                        <div class="space-y-1 max-h-24 overflow-y-auto pr-1 text-xs">
+                            @foreach($listaCumpleañeros as $cumple)
+                                <div class="flex items-center justify-between text-zinc-600 dark:text-zinc-300">
+                                    <span class="font-medium truncate max-w-[140px]" title="{{ $cumple->nombre }} {{ $cumple->apellido }}">
+                                        🎉 {{ $cumple->nombre }} {{ $cumple->apellido }}
+                                    </span>
+                                    <span class="text-pink-600 dark:text-pink-400 font-semibold">
+                                        {{ \Carbon\Carbon::parse($cumple->fecha_nacimiento)->format('d/m') }}
+                                    </span>
+                                </div>
+                            @endforeach
+                        </div>
+                    @else
+                        <span class="text-xs text-pink-600 dark:text-pink-400 font-medium flex items-center gap-1">
+                            ¡Felicitar al personal! (Sin cumpleañeros este mes)
+                        </span>
+                    @endif
                 </div>
             </div>
 

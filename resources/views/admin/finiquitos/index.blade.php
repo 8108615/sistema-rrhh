@@ -16,11 +16,14 @@
             <flux:heading size="xl" level="1">Finiquitos y Liquidaciones</flux:heading>
             <flux:subheading>Historial de desvinculaciones y cálculo de beneficios sociales.</flux:subheading>
         </div>
-        <div>
-            <a href="{{ route('admin.finiquitos.create') }}">
-                <flux:button variant="primary" icon="plus" color="blue">Nuevo Finiquito</flux:button>
-            </a>
-        </div>
+        <!-- Botón para redireccionar a la vista de creación protegido -->
+        @can('admin.finiquitos.create')
+            <div>
+                <a href="{{ route('admin.finiquitos.create') }}">
+                    <flux:button variant="primary" icon="plus" color="blue">Nuevo Finiquito</flux:button>
+                </a>
+            </div>
+        @endcan
     </div>
 
     <!-- Buscador -->
@@ -88,41 +91,49 @@
                         <td class="px-4 py-3 border border-gray-200 dark:border-zinc-700">
                             <div class="flex justify-center items-center gap-1.5">
 
-                                <a href="{{ route('admin.finiquitos.show', $finiquito->id) }}" class="px-3 py-1.5 bg-blue-500 hover:bg-blue-600 text-white text-xs font-medium rounded-md shadow-sm transition flex items-center">
-                                    <i class="fas fa-eye mr-1"></i> Ver
-                                </a>
+                                <!-- Ver protegido -->
+                                @can('admin.finiquitos.show')
+                                    <a href="{{ route('admin.finiquitos.show', $finiquito->id) }}" class="px-3 py-1.5 bg-blue-500 hover:bg-blue-600 text-white text-xs font-medium rounded-md shadow-sm transition flex items-center">
+                                        <i class="fas fa-eye mr-1"></i> Ver
+                                    </a>
+                                @endcan
 
-                                <a href="{{ route('admin.finiquitos.print', $finiquito->id) }}" target="_blank" class="px-3 py-1.5 bg-zinc-600 hover:bg-zinc-700 text-white text-xs font-medium rounded-md shadow-sm transition flex items-center">
-                                    <i class="fas fa-print mr-1"></i> Imprimir
-                                </a>
+                                <!-- Imprimir protegido -->
+                                @can('admin.finiquitos.print')
+                                    <a href="{{ route('admin.finiquitos.print', $finiquito->id) }}" target="_blank" class="px-3 py-1.5 bg-zinc-600 hover:bg-zinc-700 text-white text-xs font-medium rounded-md shadow-sm transition flex items-center">
+                                        <i class="fas fa-print mr-1"></i> Imprimir
+                                    </a>
+                                @endcan
 
-                                
-                                <form action="{{ route('admin.finiquitos.destroy', $finiquito->id) }}" method="POST" class="inline-flex" id="formEliminarFiniquito{{ $finiquito->id }}">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="px-3 py-1.5 bg-red-500 hover:bg-red-600 text-white text-xs font-medium rounded-md shadow-sm transition cursor-pointer flex items-center" onclick="confirmarEliminacionFiniquito{{ $finiquito->id }}(event)">
-                                        <i class="fas fa-trash-alt mr-1"></i> Eliminar
-                                    </button>
-                                </form>
-                                <script>
-                                    function confirmarEliminacionFiniquito{{ $finiquito->id }}(e) {
-                                        e.preventDefault();
-                                        Swal.fire({
-                                            title: '¿Eliminar registro de finiquito?',
-                                            text: "¡No podrás revertir esta acción!",
-                                            icon: 'warning',
-                                            showCancelButton: true,
-                                            confirmButtonColor: '#d33',
-                                            cancelButtonColor: '#3085d6',
-                                            confirmButtonText: 'Sí, eliminar',
-                                            cancelButtonText: 'Cancelar'
-                                        }).then((result) => {
-                                            if (result.isConfirmed) {
-                                                document.getElementById('formEliminarFiniquito{{ $finiquito->id }}').submit();
-                                            }
-                                        });
-                                    }
-                                </script>
+                                <!-- Eliminar protegido -->
+                                @can('admin.finiquitos.destroy')
+                                    <form action="{{ route('admin.finiquitos.destroy', $finiquito->id) }}" method="POST" class="inline-flex" id="formEliminarFiniquito{{ $finiquito->id }}">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="px-3 py-1.5 bg-red-500 hover:bg-red-600 text-white text-xs font-medium rounded-md shadow-sm transition cursor-pointer flex items-center" onclick="confirmarEliminacionFiniquito{{ $finiquito->id }}(event)">
+                                            <i class="fas fa-trash-alt mr-1"></i> Eliminar
+                                        </button>
+                                    </form>
+                                    <script>
+                                        function confirmarEliminacionFiniquito{{ $finiquito->id }}(e) {
+                                            e.preventDefault();
+                                            Swal.fire({
+                                                title: '¿Eliminar registro de finiquito?',
+                                                text: "¡No podrás revertir esta acción!",
+                                                icon: 'warning',
+                                                showCancelButton: true,
+                                                confirmButtonColor: '#d33',
+                                                cancelButtonColor: '#3085d6',
+                                                confirmButtonText: 'Sí, eliminar',
+                                                cancelButtonText: 'Cancelar'
+                                            }).then((result) => {
+                                                if (result.isConfirmed) {
+                                                    document.getElementById('formEliminarFiniquito{{ $finiquito->id }}').submit();
+                                                }
+                                            });
+                                        }
+                                    </script>
+                                @endcan
                             </div>
                         </td>
                     </tr>
@@ -136,6 +147,6 @@
     </div>
 
     @if ($finiquitos->hasPages())
-        <div class="mt-4">{{ $finiquitos->links() }}</div>
+        <div class="mt-4">{{ $finiquitos->appends(['buscar' => $buscar])->links() }}</div>
     @endif
 </x-layouts::app>

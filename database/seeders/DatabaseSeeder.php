@@ -197,7 +197,7 @@ class DatabaseSeeder extends Seeder
             'apellido' => 'Montenegro',
             'ci' => '1111114',
             'fecha_nacimiento' => '1986-01-15',
-            'fecha_ingreso' => '2022-09-016',
+            'fecha_ingreso' => '2022-09-16',
             'genero' => 'Masculino',
             'telefono' => '70000004',
             'direccion' => 'Radial 27',
@@ -209,7 +209,7 @@ class DatabaseSeeder extends Seeder
             'salario' => '4500.00',
             'estado' => '1',
         ]);
-        
+
 
     }
 }

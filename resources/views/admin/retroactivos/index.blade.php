@@ -1,23 +1,41 @@
 <x-layouts::app title="Gestión de Retroactivos">
+    @php
+        $ajusteDivisa = \App\Models\Ajuste::first()->divisas ?? 'BOB';
+        $jsonPath = public_path('divisas.json');
+        $simboloMoneda = $ajusteDivisa;
+        if (file_exists($jsonPath)) {
+            $divisasData = json_decode(file_get_contents($jsonPath), true);
+            if (isset($divisasData[$ajusteDivisa]['symbol'])) {
+                $simboloMoneda = $divisasData[$ajusteDivisa]['symbol'];
+            }
+        }
+    @endphp
+
     <div class="relative mb-6 w-full flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
             <flux:heading size="xl" level="1">Gestión de Retroactivos</flux:heading>
             <flux:subheading>Administra el cálculo, pago y control de incrementos salariales retroactivos por gestión.</flux:subheading>
         </div>
         <div class="flex flex-wrap items-center gap-2">
-            <button type="button" onclick="openCalculoRetroactivoModal()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-lg shadow-sm transition flex items-center gap-2 text-sm cursor-pointer">
-                <i class="fas fa-calculator"></i> Cálculo Masivo
-            </button>
+            @can('admin.retroactivos.calcular')
+                <button type="button" onclick="openCalculoRetroactivoModal()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-lg shadow-sm transition flex items-center gap-2 text-sm cursor-pointer">
+                    <i class="fas fa-calculator"></i> Cálculo Masivo
+                </button>
+            @endcan
 
             @if(isset($retroactivos) && $retroactivos->total() > 0)
-                <a href="{{ route('admin.retroactivos.print.general', ['gestion' => $gestion]) }}" target="_blank" class="px-4 py-2 bg-zinc-700 hover:bg-zinc-800 text-white font-semibold rounded-lg shadow-sm transition flex items-center gap-2 text-sm cursor-pointer">
-                    <i class="fas fa-print"></i> Imprimir Planilla General
-                </a>
+                @can('admin.retroactivos.print.general')
+                    <a href="{{ route('admin.retroactivos.print.general', ['gestion' => $gestion]) }}" target="_blank" class="px-4 py-2 bg-zinc-700 hover:bg-zinc-800 text-white font-semibold rounded-lg shadow-sm transition flex items-center gap-2 text-sm cursor-pointer">
+                        <i class="fas fa-print"></i> Imprimir Planilla General
+                    </a>
+                @endcan
             @endif
 
-            <flux:button href="{{ route('admin.retroactivos.create') }}" variant="primary" icon="plus" color="blue">
-                Nuevo Registro
-            </flux:button>
+            @can('admin.retroactivos.create')
+                <flux:button href="{{ route('admin.retroactivos.create') }}" variant="primary" icon="plus" color="blue">
+                    Nuevo Registro
+                </flux:button>
+            @endcan
         </div>
     </div>
 
@@ -115,44 +133,52 @@
                         </td>
                         <td class="px-4 py-3 border border-gray-200 dark:border-zinc-700">
                             <div class="flex justify-center items-center gap-1.5">
-                                <a href="{{ route('admin.retroactivos.show', $item->id) }}" class="px-2.5 py-1.5 bg-sky-500 hover:bg-sky-600 text-white text-xs font-medium rounded-md shadow-sm transition flex items-center" title="Ver">
-                                    <i class="fas fa-eye mr-1"></i> Ver
-                                </a>
+                                @can('admin.retroactivos.show')
+                                    <a href="{{ route('admin.retroactivos.show', $item->id) }}" class="px-2.5 py-1.5 bg-sky-500 hover:bg-sky-600 text-white text-xs font-medium rounded-md shadow-sm transition flex items-center" title="Ver">
+                                        <i class="fas fa-eye mr-1"></i> Ver
+                                    </a>
+                                @endcan
 
-                                <a href="{{ route('admin.retroactivos.print', $item->id) }}" target="_blank" title="Imprimir Comprobante" class="px-2.5 py-1.5 hover:bg-zinc-600 text-zinc-500 hover:text-zinc-700 dark:text-zinc-400 dark:hover:text-zinc-200 transition">
-                                    <i class="fas fa-print text-sm"></i>
-                                </a>
+                                @can('admin.retroactivos.print')
+                                    <a href="{{ route('admin.retroactivos.print', $item->id) }}" target="_blank" title="Imprimir Comprobante" class="px-2.5 py-1.5 hover:bg-zinc-600 text-zinc-500 hover:text-zinc-700 dark:text-zinc-400 dark:hover:text-zinc-200 transition">
+                                        <i class="fas fa-print text-sm"></i>
+                                    </a>
+                                @endcan
 
-                                <a href="{{ route('admin.retroactivos.edit', $item->id) }}" class="px-2.5 py-1.5 bg-green-500 hover:bg-green-600 text-white text-xs font-medium rounded-md shadow-sm transition flex items-center" title="Editar">
-                                    <i class="fas fa-edit mr-1"></i> Editar
-                                </a>
+                                @can('admin.retroactivos.edit')
+                                    <a href="{{ route('admin.retroactivos.edit', $item->id) }}" class="px-2.5 py-1.5 bg-green-500 hover:bg-green-600 text-white text-xs font-medium rounded-md shadow-sm transition flex items-center" title="Editar">
+                                        <i class="fas fa-edit mr-1"></i> Editar
+                                    </a>
+                                @endcan
 
-                                <form action="{{ route('admin.retroactivos.destroy', $item->id) }}" method="POST" class="inline-flex delete-form-retroactivo" id="formEliminarRetroactivo{{ $item->id }}">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="px-2.5 py-1.5 bg-red-500 hover:bg-red-600 text-white text-xs font-medium rounded-md shadow-sm transition cursor-pointer flex items-center" onclick="confirmarEliminacionRetroactivo{{ $item->id }}(event)" title="Eliminar">
-                                        <i class="fas fa-trash-alt mr-1"></i> Eliminar
-                                    </button>
-                                </form>
-                                <script>
-                                    function confirmarEliminacionRetroactivo{{ $item->id }}(e) {
-                                        e.preventDefault();
-                                        Swal.fire({
-                                            title: '¿Estás seguro?',
-                                            text: "¡No podrás revertir esta acción!",
-                                            icon: 'warning',
-                                            showCancelButton: true,
-                                            confirmButtonColor: '#d33',
-                                            cancelButtonColor: '#3085d6',
-                                            confirmButtonText: 'Sí, eliminar',
-                                            cancelButtonText: 'Cancelar'
-                                        }).then((result) => {
-                                            if (result.isConfirmed) {
-                                                document.getElementById('formEliminarRetroactivo{{ $item->id }}').submit();
-                                            }
-                                        });
-                                    }
-                                </script>
+                                @can('admin.retroactivos.destroy')
+                                    <form action="{{ route('admin.retroactivos.destroy', $item->id) }}" method="POST" class="inline-flex delete-form-retroactivo" id="formEliminarRetroactivo{{ $item->id }}">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="px-2.5 py-1.5 bg-red-500 hover:bg-red-600 text-white text-xs font-medium rounded-md shadow-sm transition cursor-pointer flex items-center" onclick="confirmarEliminacionRetroactivo{{ $item->id }}(event)" title="Eliminar">
+                                            <i class="fas fa-trash-alt mr-1"></i> Eliminar
+                                        </button>
+                                    </form>
+                                    <script>
+                                        function confirmarEliminacionRetroactivo{{ $item->id }}(e) {
+                                            e.preventDefault();
+                                            Swal.fire({
+                                                title: '¿Estás seguro?',
+                                                text: "¡No podrás revertir esta acción!",
+                                                icon: 'warning',
+                                                showCancelButton: true,
+                                                confirmButtonColor: '#d33',
+                                                cancelButtonColor: '#3085d6',
+                                                confirmButtonText: 'Sí, eliminar',
+                                                cancelButtonText: 'Cancelar'
+                                            }).then((result) => {
+                                                if (result.isConfirmed) {
+                                                    document.getElementById('formEliminarRetroactivo{{ $item->id }}').submit();
+                                                }
+                                            });
+                                        }
+                                    </script>
+                                @endcan
                             </div>
                         </td>
                     </tr>

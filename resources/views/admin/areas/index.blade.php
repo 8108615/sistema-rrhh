@@ -4,10 +4,12 @@
             <flux:heading size="xl" level="1">Áreas</flux:heading>
             <flux:subheading>Administración de las áreas o departamentos funcionales de la empresa.</flux:subheading>
         </div>
-        <!-- Botón para abrir modal de creación -->
-        <flux:modal.trigger name="crear-area">
-            <flux:button variant="primary" icon="plus" color="blue">Nueva Área</flux:button>
-        </flux:modal.trigger>
+        <!-- Botón para abrir modal de creación protegido -->
+        @can('admin.areas.store')
+            <flux:modal.trigger name="crear-area">
+                <flux:button variant="primary" icon="plus" color="blue">Nueva Área</flux:button>
+            </flux:modal.trigger>
+        @endcan
     </div>
 
     <div class="flex gap-4 mb-6">
@@ -99,76 +101,82 @@
                         </td>
                         <td class="px-4 py-3 border border-gray-200 dark:border-zinc-700 whitespace-nowrap text-center">
                             <div class="flex justify-center items-center gap-1.5">
-                                <!-- Botón Editar (Modal Trigger) -->
-                                <flux:modal.trigger name="editar-area-{{ $area->id }}">
-                                    <button type="button" class="inline-flex items-center px-3 py-1.5 bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-medium rounded-md shadow-sm transition cursor-pointer">
-                                        <i class="fas fa-pencil-alt mr-1.5"></i> Editar
-                                    </button>
-                                </flux:modal.trigger>
+                                <!-- Botón Editar protegido -->
+                                @can('admin.areas.update')
+                                    <flux:modal.trigger name="editar-area-{{ $area->id }}">
+                                        <button type="button" class="inline-flex items-center px-3 py-1.5 bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-medium rounded-md shadow-sm transition cursor-pointer">
+                                            <i class="fas fa-pencil-alt mr-1.5"></i> Editar
+                                        </button>
+                                    </flux:modal.trigger>
+                                @endcan
 
-                                <!-- Formulario Eliminar -->
-                                <form action="{{ route('admin.areas.destroy', $area) }}" method="POST" class="inline-flex" id="miFormularioEliminarArea{{ $area->id }}">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="inline-flex items-center px-3 py-1.5 bg-red-500 hover:bg-red-600 text-white text-xs font-medium rounded-md shadow-sm transition cursor-pointer" onclick="preguntarEliminarArea{{ $area->id }}(event)">
-                                        <i class="fas fa-trash-alt mr-1.5"></i> Eliminar
-                                    </button>
-                                </form>
+                                <!-- Botón Eliminar protegido -->
+                                @can('admin.areas.destroy')
+                                    <form action="{{ route('admin.areas.destroy', $area) }}" method="POST" class="inline-flex" id="miFormularioEliminarArea{{ $area->id }}">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="inline-flex items-center px-3 py-1.5 bg-red-500 hover:bg-red-600 text-white text-xs font-medium rounded-md shadow-sm transition cursor-pointer" onclick="preguntarEliminarArea{{ $area->id }}(event)">
+                                            <i class="fas fa-trash-alt mr-1.5"></i> Eliminar
+                                        </button>
+                                    </form>
 
-                                <script>
-                                    function preguntarEliminarArea{{ $area->id }}(event) {
-                                        event.preventDefault();
-                                        Swal.fire({
-                                            title: '¿Desea eliminar esta área?',
-                                            icon: 'question',
-                                            showDenyButton: true,
-                                            confirmButtonText: 'Eliminar',
-                                            confirmButtonColor: '#a5161d',
-                                            denyButtonColor: '#270a0a',
-                                            denyButtonText: 'Cancelar',
-                                        }).then((result) => {
-                                            if (result.isConfirmed) {
-                                                document.getElementById('miFormularioEliminarArea{{ $area->id }}').submit();
-                                            }
-                                        });
-                                    }
-                                </script>
+                                    <script>
+                                        function preguntarEliminarArea{{ $area->id }}(event) {
+                                            event.preventDefault();
+                                            Swal.fire({
+                                                title: '¿Desea eliminar esta área?',
+                                                icon: 'question',
+                                                showDenyButton: true,
+                                                confirmButtonText: 'Eliminar',
+                                                confirmButtonColor: '#a5161d',
+                                                denyButtonColor: '#270a0a',
+                                                denyButtonText: 'Cancelar',
+                                            }).then((result) => {
+                                                if (result.isConfirmed) {
+                                                    document.getElementById('miFormularioEliminarArea{{ $area->id }}').submit();
+                                                }
+                                            });
+                                        }
+                                    </script>
+                                @endcan
                             </div>
                         </td>
                     </tr>
 
-                    <!-- Modal de Edición para cada registro -->
-                    <flux:modal name="editar-area-{{ $area->id }}" class="md:w-96">
-                        <form action="{{ route('admin.areas.update', $area) }}" method="POST" class="space-y-6">
-                            @csrf
-                            @method('PUT')
-                            <div>
-                                <flux:heading size="lg">Editar Área</flux:heading>
-                                <flux:subheading>Modifica el nombre o estado del área.</flux:subheading>
-                            </div>
-
-                            <flux:input label="Nombre" name="nombre" value="{{ old('nombre', $area->nombre) }}" required />
-
-                            <!-- Toggle Switch ON/OFF -->
-                            <div class="flex flex-col gap-1.5">
-                                <label class="text-sm font-medium text-gray-700 dark:text-gray-300">Estado</label>
-                                <div class="relative inline-block w-28 select-none transition duration-250 ease-in">
-                                    <input type="checkbox" name="estado" value="1" id="toggle-edit-area-{{ $area->id }}" {{ $area->estado ? 'checked' : '' }} class="toggle-checkbox absolute block w-7 h-7 rounded-full bg-white border-4 appearance-none cursor-pointer z-10 top-0.5 left-0.5 transition-all duration-300 shadow-md checked:translate-x-[72px]" />
-                                    <label for="toggle-edit-area-{{ $area->id }}" class="toggle-label block overflow-hidden h-8 rounded-full cursor-pointer transition-colors duration-300 shadow-inner relative">
-                                        <span class="text-on absolute text-white text-xs font-bold tracking-wider left-3.5 top-2 select-none">ON</span>
-                                        <span class="text-off absolute text-white text-xs font-bold tracking-wider right-3.5 top-2 select-none">OFF</span>
-                                    </label>
+                    <!-- Modal de Edición protegido -->
+                    @can('admin.areas.update')
+                        <flux:modal name="editar-area-{{ $area->id }}" class="md:w-96">
+                            <form action="{{ route('admin.areas.update', $area) }}" method="POST" class="space-y-6">
+                                @csrf
+                                @method('PUT')
+                                <div>
+                                    <flux:heading size="lg">Editar Área</flux:heading>
+                                    <flux:subheading>Modifica el nombre o estado del área.</flux:subheading>
                                 </div>
-                            </div>
 
-                            <div class="flex justify-end gap-2">
-                                <flux:modal.close>
-                                    <flux:button variant="subtle">Cancelar</flux:button>
-                                </flux:modal.close>
-                                <flux:button type="submit" variant="primary">Actualizar</flux:button>
-                            </div>
-                        </form>
-                    </flux:modal>
+                                <flux:input label="Nombre" name="nombre" value="{{ old('nombre', $area->nombre) }}" required />
+
+                                <!-- Toggle Switch ON/OFF -->
+                                <div class="flex flex-col gap-1.5">
+                                    <label class="text-sm font-medium text-gray-700 dark:text-gray-300">Estado</label>
+                                    <div class="relative inline-block w-28 select-none transition duration-250 ease-in">
+                                        <input type="checkbox" name="estado" value="1" id="toggle-edit-area-{{ $area->id }}" {{ $area->estado ? 'checked' : '' }} class="toggle-checkbox absolute block w-7 h-7 rounded-full bg-white border-4 appearance-none cursor-pointer z-10 top-0.5 left-0.5 transition-all duration-300 shadow-md checked:translate-x-[72px]" />
+                                        <label for="toggle-edit-area-{{ $area->id }}" class="toggle-label block overflow-hidden h-8 rounded-full cursor-pointer transition-colors duration-300 shadow-inner relative">
+                                            <span class="text-on absolute text-white text-xs font-bold tracking-wider left-3.5 top-2 select-none">ON</span>
+                                            <span class="text-off absolute text-white text-xs font-bold tracking-wider right-3.5 top-2 select-none">OFF</span>
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <div class="flex justify-end gap-2">
+                                    <flux:modal.close>
+                                        <flux:button variant="subtle">Cancelar</flux:button>
+                                    </flux:modal.close>
+                                    <flux:button type="submit" variant="primary">Actualizar</flux:button>
+                                </div>
+                            </form>
+                        </flux:modal>
+                    @endcan
 
                 @empty
                     <tr>
@@ -196,37 +204,39 @@
         </div>
     @endif
 
-    <!-- Modal de Creación -->
-    <flux:modal name="crear-area" class="md:w-96">
-        <form action="{{ route('admin.areas.store') }}" method="POST" class="space-y-6">
-            @csrf
-            <div>
-                <flux:heading size="lg">Nueva Área</flux:heading>
-                <flux:subheading>Registra una nueva área o departamento funcional.</flux:subheading>
-            </div>
-
-            <flux:input label="Nombre" name="nombre" placeholder="Ej: Recursos Humanos" required />
-
-            <!-- Toggle Switch ON/OFF -->
-            <div class="flex flex-col gap-1.5">
-                <label class="text-sm font-medium text-gray-700 dark:text-gray-300">Estado</label>
-                <div class="relative inline-block w-28 select-none transition duration-250 ease-in">
-                    <input type="checkbox" name="estado" value="1" id="toggle-nuevo-area" checked class="toggle-checkbox absolute block w-7 h-7 rounded-full bg-white border-4 appearance-none cursor-pointer z-10 top-0.5 left-0.5 transition-all duration-300 shadow-md checked:translate-x-[72px]" />
-                    <label for="toggle-nuevo-area" class="toggle-label block overflow-hidden h-8 rounded-full cursor-pointer transition-colors duration-300 shadow-inner relative">
-                        <span class="text-on absolute text-white text-xs font-bold tracking-wider left-3.5 top-2 select-none">ON</span>
-                        <span class="text-off absolute text-white text-xs font-bold tracking-wider right-3.5 top-2 select-none">OFF</span>
-                    </label>
+    <!-- Modal de Creación protegido -->
+    @can('admin.areas.store')
+        <flux:modal name="crear-area" class="md:w-96">
+            <form action="{{ route('admin.areas.store') }}" method="POST" class="space-y-6">
+                @csrf
+                <div>
+                    <flux:heading size="lg">Nueva Área</flux:heading>
+                    <flux:subheading>Registra una nueva área o departamento funcional.</flux:subheading>
                 </div>
-            </div>
 
-            <div class="flex justify-end gap-2">
-                <flux:modal.close>
-                    <flux:button variant="subtle">Cancelar</flux:button>
-                </flux:modal.close>
-                <flux:button type="submit" variant="primary">Guardar</flux:button>
-            </div>
-        </form>
-    </flux:modal>
+                <flux:input label="Nombre" name="nombre" placeholder="Ej: Recursos Humanos" required />
+
+                <!-- Toggle Switch ON/OFF -->
+                <div class="flex flex-col gap-1.5">
+                    <label class="text-sm font-medium text-gray-700 dark:text-gray-300">Estado</label>
+                    <div class="relative inline-block w-28 select-none transition duration-250 ease-in">
+                        <input type="checkbox" name="estado" value="1" id="toggle-nuevo-area" checked class="toggle-checkbox absolute block w-7 h-7 rounded-full bg-white border-4 appearance-none cursor-pointer z-10 top-0.5 left-0.5 transition-all duration-300 shadow-md checked:translate-x-[72px]" />
+                        <label for="toggle-nuevo-area" class="toggle-label block overflow-hidden h-8 rounded-full cursor-pointer transition-colors duration-300 shadow-inner relative">
+                            <span class="text-on absolute text-white text-xs font-bold tracking-wider left-3.5 top-2 select-none">ON</span>
+                            <span class="text-off absolute text-white text-xs font-bold tracking-wider right-3.5 top-2 select-none">OFF</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="flex justify-end gap-2">
+                    <flux:modal.close>
+                        <flux:button variant="subtle">Cancelar</flux:button>
+                    </flux:modal.close>
+                    <flux:button type="submit" variant="primary">Guardar</flux:button>
+                </div>
+            </form>
+        </flux:modal>
+    @endcan
 
     @if (session('success'))
         <script>

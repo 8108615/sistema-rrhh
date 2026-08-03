@@ -5,12 +5,12 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\Request;
-
 use Spatie\Permission\Models\Role;
 use Illuminate\Support\Facades\Storage;
 
 class UsuarioController extends Controller
 {
+
     public function index(Request $request)
     {
         $buscar = $request->input('buscar');

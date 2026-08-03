@@ -4,10 +4,12 @@
             <flux:heading size="xl" level="1">Empleados</flux:heading>
             <flux:subheading>Administración del personal, áreas, y datos laborales.</flux:subheading>
         </div>
-        <!-- Botón para redireccionar a la vista de creación -->
-        <a href="{{ route('admin.empleados.create') }}">
-            <flux:button variant="primary" icon="plus" color="blue">Nuevo Empleado</flux:button>
-        </a>
+        <!-- Botón para redireccionar a la vista de creación protegido -->
+        @can('admin.empleados.create')
+            <a href="{{ route('admin.empleados.create') }}">
+                <flux:button variant="primary" icon="plus" color="blue">Nuevo Empleado</flux:button>
+            </a>
+        @endcan
     </div>
 
     <div class="flex gap-4 mb-6">
@@ -108,44 +110,50 @@
                         </td>
                         <td class="px-4 py-3 border border-gray-200 dark:border-zinc-700 whitespace-nowrap text-center">
                             <div class="flex justify-center items-center gap-1.5">
-                                <!-- Botón Ver (Show) -->
-                                <a href="{{ route('admin.empleados.show', $empleado->id) }}" class="inline-flex items-center px-3 py-1.5 bg-sky-500 hover:bg-sky-600 text-white text-xs font-medium rounded-md shadow-sm transition cursor-pointer">
-                                    <i class="fas fa-eye mr-1.5"></i> Ver
-                                </a>
-                                
-                                <!-- Botón Editar -->
-                                <a href="{{ route('admin.empleados.edit', $empleado) }}" class="inline-flex items-center px-3 py-1.5 bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-medium rounded-md shadow-sm transition cursor-pointer">
-                                    <i class="fas fa-pencil-alt mr-1.5"></i> Editar
-                                </a>
+                                <!-- Botón Ver (Show) protegido -->
+                                @can('admin.empleados.show')
+                                    <a href="{{ route('admin.empleados.show', $empleado->id) }}" class="inline-flex items-center px-3 py-1.5 bg-sky-500 hover:bg-sky-600 text-white text-xs font-medium rounded-md shadow-sm transition cursor-pointer">
+                                        <i class="fas fa-eye mr-1.5"></i> Ver
+                                    </a>
+                                @endcan
 
-                                <!-- Formulario Eliminar -->
-                                <form action="{{ route('admin.empleados.destroy', $empleado) }}" method="POST" class="inline-flex" id="miFormularioEliminarEmpleado{{ $empleado->id }}">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="inline-flex items-center px-3 py-1.5 bg-red-500 hover:bg-red-600 text-white text-xs font-medium rounded-md shadow-sm transition cursor-pointer" onclick="preguntarEliminarEmpleado{{ $empleado->id }}(event)">
-                                        <i class="fas fa-trash-alt mr-1.5"></i> Eliminar
-                                    </button>
-                                </form>
+                                <!-- Botón Editar protegido -->
+                                @can('admin.empleados.edit')
+                                    <a href="{{ route('admin.empleados.edit', $empleado) }}" class="inline-flex items-center px-3 py-1.5 bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-medium rounded-md shadow-sm transition cursor-pointer">
+                                        <i class="fas fa-pencil-alt mr-1.5"></i> Editar
+                                    </a>
+                                @endcan
 
-                                <script>
-                                    function preguntarEliminarEmpleado{{ $empleado->id }}(event) {
-                                        event.preventDefault();
-                                        Swal.fire({
-                                            title: '¿Desea eliminar a este empleado?',
-                                            text: "¡No podrás revertir esto!",
-                                            icon: 'warning',
-                                            showDenyButton: true,
-                                            confirmButtonText: 'Sí, eliminar',
-                                            confirmButtonColor: '#a5161d',
-                                            denyButtonColor: '#270a0a',
-                                            denyButtonText: 'Cancelar',
-                                        }).then((result) => {
-                                            if (result.isConfirmed) {
-                                                document.getElementById('miFormularioEliminarEmpleado{{ $empleado->id }}').submit();
-                                            }
-                                        });
-                                    }
-                                </script>
+                                <!-- Formulario Eliminar protegido -->
+                                @can('admin.empleados.destroy')
+                                    <form action="{{ route('admin.empleados.destroy', $empleado) }}" method="POST" class="inline-flex" id="miFormularioEliminarEmpleado{{ $empleado->id }}">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="inline-flex items-center px-3 py-1.5 bg-red-500 hover:bg-red-600 text-white text-xs font-medium rounded-md shadow-sm transition cursor-pointer" onclick="preguntarEliminarEmpleado{{ $empleado->id }}(event)">
+                                            <i class="fas fa-trash-alt mr-1.5"></i> Eliminar
+                                        </button>
+                                    </form>
+
+                                    <script>
+                                        function preguntarEliminarEmpleado{{ $empleado->id }}(event) {
+                                            event.preventDefault();
+                                            Swal.fire({
+                                                title: '¿Desea eliminar a este empleado?',
+                                                text: "¡No podrás revertir esto!",
+                                                icon: 'warning',
+                                                showDenyButton: true,
+                                                confirmButtonText: 'Sí, eliminar',
+                                                confirmButtonColor: '#a5161d',
+                                                denyButtonColor: '#270a0a',
+                                                denyButtonText: 'Cancelar',
+                                            }).then((result) => {
+                                                if (result.isConfirmed) {
+                                                    document.getElementById('miFormularioEliminarEmpleado{{ $empleado->id }}').submit();
+                                                }
+                                            });
+                                        }
+                                    </script>
+                                @endcan
                             </div>
                         </td>
                     </tr>

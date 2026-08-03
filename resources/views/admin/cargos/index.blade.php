@@ -4,10 +4,12 @@
             <flux:heading size="xl" level="1">Cargos</flux:heading>
             <flux:subheading>Administración de los puestos de trabajo y su relación con las áreas.</flux:subheading>
         </div>
-        <!-- Botón para abrir modal de creación -->
-        <flux:modal.trigger name="crear-cargo">
-            <flux:button variant="primary" icon="plus" color="blue">Nuevo Cargo</flux:button>
-        </flux:modal.trigger>
+        <!-- Botón para abrir modal de creación protegido -->
+        @can('admin.cargos.store')
+            <flux:modal.trigger name="crear-cargo">
+                <flux:button variant="primary" icon="plus" color="blue">Nuevo Cargo</flux:button>
+            </flux:modal.trigger>
+        @endcan
     </div>
 
     <div class="flex gap-4 mb-6">
@@ -107,89 +109,95 @@
                         </td>
                         <td class="px-4 py-3 border border-gray-200 dark:border-zinc-700 whitespace-nowrap text-center">
                             <div class="flex justify-center items-center gap-1.5">
-                                <!-- Botón Editar (Modal Trigger) -->
-                                <flux:modal.trigger name="editar-cargo-{{ $cargo->id }}">
-                                    <button type="button" class="inline-flex items-center px-3 py-1.5 bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-medium rounded-md shadow-sm transition cursor-pointer">
-                                        <i class="fas fa-pencil-alt mr-1.5"></i> Editar
-                                    </button>
-                                </flux:modal.trigger>
+                                <!-- Botón Editar protegido -->
+                                @can('admin.cargos.update')
+                                    <flux:modal.trigger name="editar-cargo-{{ $cargo->id }}">
+                                        <button type="button" class="inline-flex items-center px-3 py-1.5 bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-medium rounded-md shadow-sm transition cursor-pointer">
+                                            <i class="fas fa-pencil-alt mr-1.5"></i> Editar
+                                        </button>
+                                    </flux:modal.trigger>
+                                @endcan
 
-                                <!-- Formulario Eliminar -->
-                                <form action="{{ route('admin.cargos.destroy', $cargo) }}" method="POST" class="inline-flex" id="miFormularioEliminarCargo{{ $cargo->id }}">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="inline-flex items-center px-3 py-1.5 bg-red-500 hover:bg-red-600 text-white text-xs font-medium rounded-md shadow-sm transition cursor-pointer" onclick="preguntarEliminarCargo{{ $cargo->id }}(event)">
-                                        <i class="fas fa-trash-alt mr-1.5"></i> Eliminar
-                                    </button>
-                                </form>
+                                <!-- Botón Eliminar protegido -->
+                                @can('admin.cargos.destroy')
+                                    <form action="{{ route('admin.cargos.destroy', $cargo) }}" method="POST" class="inline-flex" id="miFormularioEliminarCargo{{ $cargo->id }}">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="inline-flex items-center px-3 py-1.5 bg-red-500 hover:bg-red-600 text-white text-xs font-medium rounded-md shadow-sm transition cursor-pointer" onclick="preguntarEliminarCargo{{ $cargo->id }}(event)">
+                                            <i class="fas fa-trash-alt mr-1.5"></i> Eliminar
+                                        </button>
+                                    </form>
 
-                                <script>
-                                    function preguntarEliminarCargo{{ $cargo->id }}(event) {
-                                        event.preventDefault();
-                                        Swal.fire({
-                                            title: '¿Desea eliminar este cargo?',
-                                            icon: 'question',
-                                            showDenyButton: true,
-                                            confirmButtonText: 'Eliminar',
-                                            confirmButtonColor: '#a5161d',
-                                            denyButtonColor: '#270a0a',
-                                            denyButtonText: 'Cancelar',
-                                        }).then((result) => {
-                                            if (result.isConfirmed) {
-                                                document.getElementById('miFormularioEliminarCargo{{ $cargo->id }}').submit();
-                                            }
-                                        });
-                                    }
-                                </script>
+                                    <script>
+                                        function preguntarEliminarCargo{{ $cargo->id }}(event) {
+                                            event.preventDefault();
+                                            Swal.fire({
+                                                title: '¿Desea eliminar este cargo?',
+                                                icon: 'question',
+                                                showDenyButton: true,
+                                                confirmButtonText: 'Eliminar',
+                                                confirmButtonColor: '#a5161d',
+                                                denyButtonColor: '#270a0a',
+                                                denyButtonText: 'Cancelar',
+                                            }).then((result) => {
+                                                if (result.isConfirmed) {
+                                                    document.getElementById('miFormularioEliminarCargo{{ $cargo->id }}').submit();
+                                                }
+                                            });
+                                        }
+                                    </script>
+                                @endcan
                             </div>
                         </td>
                     </tr>
 
-                    <!-- Modal de Edición para cada registro -->
-                    <flux:modal name="editar-cargo-{{ $cargo->id }}" class="md:w-96">
-                        <form action="{{ route('admin.cargos.update', $cargo) }}" method="POST" class="space-y-6">
-                            @csrf
-                            @method('PUT')
-                            <div>
-                                <flux:heading size="lg">Editar Cargo</flux:heading>
-                                <flux:subheading>Modifica los datos del cargo.</flux:subheading>
-                            </div>
-
-                            <!-- Selector de Área -->
-                            <div class="flex flex-col gap-1.5">
-                                <label class="text-sm font-medium text-gray-700 dark:text-gray-300">Área</label>
-                                <select name="area_id" required class="w-full rounded-lg border-gray-300 dark:border-zinc-700 dark:bg-zinc-900 dark:text-white text-sm shadow-sm focus:ring-indigo-500 focus:border-indigo-500 px-3 py-2">
-                                    <option value="">Seleccione un área</option>
-                                    @foreach ($areas as $area)
-                                        <option value="{{ $area->id }}" {{ $cargo->area_id == $area->id ? 'selected' : '' }}>
-                                            {{ $area->nombre }}
-                                        </option>
-                                    @endforeach
-                                </select>
-                            </div>
-
-                            <flux:input label="Nombre del Cargo" name="nombre" value="{{ old('nombre', $cargo->nombre) }}" required />
-
-                            <!-- Toggle Switch ON/OFF -->
-                            <div class="flex flex-col gap-1.5">
-                                <label class="text-sm font-medium text-gray-700 dark:text-gray-300">Estado</label>
-                                <div class="relative inline-block w-28 select-none transition duration-250 ease-in">
-                                    <input type="checkbox" name="estado" value="1" id="toggle-edit-cargo-{{ $cargo->id }}" {{ $cargo->estado ? 'checked' : '' }} class="toggle-checkbox absolute block w-7 h-7 rounded-full bg-white border-4 appearance-none cursor-pointer z-10 top-0.5 left-0.5 transition-all duration-300 shadow-md checked:translate-x-[72px]" />
-                                    <label for="toggle-edit-cargo-{{ $cargo->id }}" class="toggle-label block overflow-hidden h-8 rounded-full cursor-pointer transition-colors duration-300 shadow-inner relative">
-                                        <span class="text-on absolute text-white text-xs font-bold tracking-wider left-3.5 top-2 select-none">ON</span>
-                                        <span class="text-off absolute text-white text-xs font-bold tracking-wider right-3.5 top-2 select-none">OFF</span>
-                                    </label>
+                    <!-- Modal de Edición protegido -->
+                    @can('admin.cargos.update')
+                        <flux:modal name="editar-cargo-{{ $cargo->id }}" class="md:w-96">
+                            <form action="{{ route('admin.cargos.update', $cargo) }}" method="POST" class="space-y-6">
+                                @csrf
+                                @method('PUT')
+                                <div>
+                                    <flux:heading size="lg">Editar Cargo</flux:heading>
+                                    <flux:subheading>Modifica los datos del cargo.</flux:subheading>
                                 </div>
-                            </div>
 
-                            <div class="flex justify-end gap-2">
-                                <flux:modal.close>
-                                    <flux:button variant="subtle">Cancelar</flux:button>
-                                </flux:modal.close>
-                                <flux:button type="submit" variant="primary">Actualizar</flux:button>
-                            </div>
-                        </form>
-                    </flux:modal>
+                                <!-- Selector de Área -->
+                                <div class="flex flex-col gap-1.5">
+                                    <label class="text-sm font-medium text-gray-700 dark:text-gray-300">Área</label>
+                                    <select name="area_id" required class="w-full rounded-lg border-gray-300 dark:border-zinc-700 dark:bg-zinc-900 dark:text-white text-sm shadow-sm focus:ring-indigo-500 focus:border-indigo-500 px-3 py-2">
+                                        <option value="">Seleccione un área</option>
+                                        @foreach ($areas as $area)
+                                            <option value="{{ $area->id }}" {{ $cargo->area_id == $area->id ? 'selected' : '' }}>
+                                                {{ $area->nombre }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                </div>
+
+                                <flux:input label="Nombre del Cargo" name="nombre" value="{{ old('nombre', $cargo->nombre) }}" required />
+
+                                <!-- Toggle Switch ON/OFF -->
+                                <div class="flex flex-col gap-1.5">
+                                    <label class="text-sm font-medium text-gray-700 dark:text-gray-300">Estado</label>
+                                    <div class="relative inline-block w-28 select-none transition duration-250 ease-in">
+                                        <input type="checkbox" name="estado" value="1" id="toggle-edit-cargo-{{ $cargo->id }}" {{ $cargo->estado ? 'checked' : '' }} class="toggle-checkbox absolute block w-7 h-7 rounded-full bg-white border-4 appearance-none cursor-pointer z-10 top-0.5 left-0.5 transition-all duration-300 shadow-md checked:translate-x-[72px]" />
+                                        <label for="toggle-edit-cargo-{{ $cargo->id }}" class="toggle-label block overflow-hidden h-8 rounded-full cursor-pointer transition-colors duration-300 shadow-inner relative">
+                                            <span class="text-on absolute text-white text-xs font-bold tracking-wider left-3.5 top-2 select-none">ON</span>
+                                            <span class="text-off absolute text-white text-xs font-bold tracking-wider right-3.5 top-2 select-none">OFF</span>
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <div class="flex justify-end gap-2">
+                                    <flux:modal.close>
+                                        <flux:button variant="subtle">Cancelar</flux:button>
+                                    </flux:modal.close>
+                                    <flux:button type="submit" variant="primary">Actualizar</flux:button>
+                                </div>
+                            </form>
+                        </flux:modal>
+                    @endcan
 
                 @empty
                     <tr>
@@ -217,48 +225,50 @@
         </div>
     @endif
 
-    <!-- Modal de Creación -->
-    <flux:modal name="crear-cargo" class="md:w-96">
-        <form action="{{ route('admin.cargos.store') }}" method="POST" class="space-y-6">
-            @csrf
-            <div>
-                <flux:heading size="lg">Nuevo Cargo</flux:heading>
-                <flux:subheading>Registra un nuevo puesto de trabajo.</flux:subheading>
-            </div>
-
-            <!-- Selector de Área -->
-            <div class="flex flex-col gap-1.5">
-                <label class="text-sm font-medium text-gray-700 dark:text-gray-300">Área</label>
-                <select name="area_id" required class="w-full rounded-lg border-gray-300 dark:border-zinc-700 dark:bg-zinc-900 dark:text-white text-sm shadow-sm focus:ring-indigo-500 focus:border-indigo-500 px-3 py-2">
-                    <option value="">Seleccione un área</option>
-                    @foreach ($areas as $area)
-                        <option value="{{ $area->id }}">{{ $area->nombre }}</option>
-                    @endforeach
-                </select>
-            </div>
-
-            <flux:input label="Nombre del Cargo" name="nombre" placeholder="Ej: Desarrollador Backend" required />
-
-            <!-- Toggle Switch ON/OFF -->
-            <div class="flex flex-col gap-1.5">
-                <label class="text-sm font-medium text-gray-700 dark:text-gray-300">Estado</label>
-                <div class="relative inline-block w-28 select-none transition duration-250 ease-in">
-                    <input type="checkbox" name="estado" value="1" id="toggle-nuevo-cargo" checked class="toggle-checkbox absolute block w-7 h-7 rounded-full bg-white border-4 appearance-none cursor-pointer z-10 top-0.5 left-0.5 transition-all duration-300 shadow-md checked:translate-x-[72px]" />
-                    <label for="toggle-nuevo-cargo" class="toggle-label block overflow-hidden h-8 rounded-full cursor-pointer transition-colors duration-300 shadow-inner relative">
-                        <span class="text-on absolute text-white text-xs font-bold tracking-wider left-3.5 top-2 select-none">ON</span>
-                        <span class="text-off absolute text-white text-xs font-bold tracking-wider right-3.5 top-2 select-none">OFF</span>
-                    </label>
+    <!-- Modal de Creación protegido -->
+    @can('admin.cargos.store')
+        <flux:modal name="crear-cargo" class="md:w-96">
+            <form action="{{ route('admin.cargos.store') }}" method="POST" class="space-y-6">
+                @csrf
+                <div>
+                    <flux:heading size="lg">Nuevo Cargo</flux:heading>
+                    <flux:subheading>Registra un nuevo puesto de trabajo.</flux:subheading>
                 </div>
-            </div>
 
-            <div class="flex justify-end gap-2">
-                <flux:modal.close>
-                    <flux:button variant="subtle">Cancelar</flux:button>
-                </flux:modal.close>
-                <flux:button type="submit" variant="primary">Guardar</flux:button>
-            </div>
-        </form>
-    </flux:modal>
+                <!-- Selector de Área -->
+                <div class="flex flex-col gap-1.5">
+                    <label class="text-sm font-medium text-gray-700 dark:text-gray-300">Área</label>
+                    <select name="area_id" required class="w-full rounded-lg border-gray-300 dark:border-zinc-700 dark:bg-zinc-900 dark:text-white text-sm shadow-sm focus:ring-indigo-500 focus:border-indigo-500 px-3 py-2">
+                        <option value="">Seleccione un área</option>
+                        @foreach ($areas as $area)
+                            <option value="{{ $area->id }}">{{ $area->nombre }}</option>
+                        @endforeach
+                    </select>
+                </div>
+
+                <flux:input label="Nombre del Cargo" name="nombre" placeholder="Ej: Desarrollador Backend" required />
+
+                <!-- Toggle Switch ON/OFF -->
+                <div class="flex flex-col gap-1.5">
+                    <label class="text-sm font-medium text-gray-700 dark:text-gray-300">Estado</label>
+                    <div class="relative inline-block w-28 select-none transition duration-250 ease-in">
+                        <input type="checkbox" name="estado" value="1" id="toggle-nuevo-cargo" checked class="toggle-checkbox absolute block w-7 h-7 rounded-full bg-white border-4 appearance-none cursor-pointer z-10 top-0.5 left-0.5 transition-all duration-300 shadow-md checked:translate-x-[72px]" />
+                        <label for="toggle-nuevo-cargo" class="toggle-label block overflow-hidden h-8 rounded-full cursor-pointer transition-colors duration-300 shadow-inner relative">
+                            <span class="text-on absolute text-white text-xs font-bold tracking-wider left-3.5 top-2 select-none">ON</span>
+                            <span class="text-off absolute text-white text-xs font-bold tracking-wider right-3.5 top-2 select-none">OFF</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="flex justify-end gap-2">
+                    <flux:modal.close>
+                        <flux:button variant="subtle">Cancelar</flux:button>
+                    </flux:modal.close>
+                    <flux:button type="submit" variant="primary">Guardar</flux:button>
+                </div>
+            </form>
+        </flux:modal>
+    @endcan
 
     @if (session('success'))
         <script>

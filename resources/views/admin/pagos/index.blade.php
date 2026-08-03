@@ -4,11 +4,14 @@
             <flux:heading size="xl" level="1">Pagos y Boletas de Sueldo</flux:heading>
             <flux:subheading>Historial de desembolsos realizados al personal.</flux:subheading>
         </div>
-        <div>
-            <a href="{{ route('admin.pagos.create') }}">
-                <flux:button variant="primary" icon="plus" color="blue">Nuevo Pago</flux:button>
-            </a>
-        </div>
+        <!-- Botón para redireccionar a la vista de creación protegido -->
+        @can('admin.pagos.create')
+            <div>
+                <a href="{{ route('admin.pagos.create') }}">
+                    <flux:button variant="primary" icon="plus" color="blue">Nuevo Pago</flux:button>
+                </a>
+            </div>
+        @endcan
     </div>
 
     <!-- Buscador -->
@@ -73,48 +76,56 @@
                         </td>
                         <td class="px-4 py-3 border border-gray-200 dark:border-zinc-700">
                             <div class="flex justify-center items-center gap-1.5">
-                                <!-- Ver / Boleta -->
-                                <a href="{{ route('admin.pagos.show', $pago->id) }}" class="px-3 py-1.5 bg-sky-500 hover:bg-sky-600 text-white text-xs font-medium rounded-md shadow-sm transition flex items-center">
-                                    <i class="fas fa-eye mr-1"></i> Ver
-                                </a>
+                                <!-- Ver / Boleta protegido -->
+                                @can('admin.pagos.show')
+                                    <a href="{{ route('admin.pagos.show', $pago->id) }}" class="px-3 py-1.5 bg-sky-500 hover:bg-sky-600 text-white text-xs font-medium rounded-md shadow-sm transition flex items-center">
+                                        <i class="fas fa-eye mr-1"></i> Ver
+                                    </a>
+                                @endcan
 
-                                <!-- Imprimir Individual (Usa tu ruta print existente) -->
-                                <a href="{{ route('admin.pagos.print', $pago->id) }}" target="_blank" class="px-3 py-1.5 bg-zinc-600 hover:bg-zinc-700 text-white text-xs font-medium rounded-md shadow-sm transition flex items-center">
-                                    <i class="fas fa-print mr-1"></i> Imprimir
-                                </a>
+                                <!-- Imprimir Individual protegido -->
+                                @can('admin.pagos.print')
+                                    <a href="{{ route('admin.pagos.print', $pago->id) }}" target="_blank" class="px-3 py-1.5 bg-zinc-600 hover:bg-zinc-700 text-white text-xs font-medium rounded-md shadow-sm transition flex items-center">
+                                        <i class="fas fa-print mr-1"></i> Imprimir
+                                    </a>
+                                @endcan
 
-                                <!-- Editar -->
-                                <a href="{{ route('admin.pagos.edit', $pago->id) }}" class="px-3 py-1.5 bg-amber-500 hover:bg-amber-600 text-white text-xs font-medium rounded-md shadow-sm transition flex items-center">
-                                    <i class="fas fa-edit mr-1"></i> Editar
-                                </a>
+                                <!-- Editar protegido -->
+                                @can('admin.pagos.edit')
+                                    <a href="{{ route('admin.pagos.edit', $pago->id) }}" class="px-3 py-1.5 bg-amber-500 hover:bg-amber-600 text-white text-xs font-medium rounded-md shadow-sm transition flex items-center">
+                                        <i class="fas fa-edit mr-1"></i> Editar
+                                    </a>
+                                @endcan
 
-                                <!-- Eliminar con confirmación de SweetAlert local -->
-                                <form action="{{ route('admin.pagos.destroy', $pago->id) }}" method="POST" class="inline-flex" id="formEliminarPago{{ $pago->id }}">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="px-3 py-1.5 bg-red-500 hover:bg-red-600 text-white text-xs font-medium rounded-md shadow-sm transition cursor-pointer flex items-center" onclick="confirmarEliminacion{{ $pago->id }}(event)">
-                                        <i class="fas fa-trash-alt mr-1"></i> Eliminar
-                                    </button>
-                                </form>
-                                <script>
-                                    function confirmarEliminacion{{ $pago->id }}(e) {
-                                        e.preventDefault();
-                                        Swal.fire({
-                                            title: '¿Eliminar registro de pago?',
-                                            text: "¡No podrás revertir esta acción!",
-                                            icon: 'warning',
-                                            showCancelButton: true,
-                                            confirmButtonColor: '#d33',
-                                            cancelButtonColor: '#3085d6',
-                                            confirmButtonText: 'Sí, eliminar',
-                                            cancelButtonText: 'Cancelar'
-                                        }).then((result) => {
-                                            if (result.isConfirmed) {
-                                                document.getElementById('formEliminarPago{{ $pago->id }}').submit();
-                                            }
-                                        });
-                                    }
-                                </script>
+                                <!-- Eliminar protegido -->
+                                @can('admin.pagos.destroy')
+                                    <form action="{{ route('admin.pagos.destroy', $pago->id) }}" method="POST" class="inline-flex" id="formEliminarPago{{ $pago->id }}">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="px-3 py-1.5 bg-red-500 hover:bg-red-600 text-white text-xs font-medium rounded-md shadow-sm transition cursor-pointer flex items-center" onclick="confirmarEliminacion{{ $pago->id }}(event)">
+                                            <i class="fas fa-trash-alt mr-1"></i> Eliminar
+                                        </button>
+                                    </form>
+                                    <script>
+                                        function confirmarEliminacion{{ $pago->id }}(e) {
+                                            e.preventDefault();
+                                            Swal.fire({
+                                                title: '¿Eliminar registro de pago?',
+                                                text: "¡No podrás revertir esta acción!",
+                                                icon: 'warning',
+                                                showCancelButton: true,
+                                                confirmButtonColor: '#d33',
+                                                cancelButtonColor: '#3085d6',
+                                                confirmButtonText: 'Sí, eliminar',
+                                                cancelButtonText: 'Cancelar'
+                                            }).then((result) => {
+                                                if (result.isConfirmed) {
+                                                    document.getElementById('formEliminarPago{{ $pago->id }}').submit();
+                                                }
+                                            });
+                                        }
+                                    </script>
+                                @endcan
                             </div>
                         </td>
                     </tr>

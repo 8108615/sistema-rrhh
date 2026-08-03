@@ -4,10 +4,12 @@
             <flux:heading size="xl" level="1">Departamentos</flux:heading>
             <flux:subheading>Administración de departamentos y regiones del país.</flux:subheading>
         </div>
-        <!-- Botón para abrir modal de creación -->
-        <flux:modal.trigger name="crear-departamento">
-            <flux:button variant="primary" icon="plus" color="blue">Nuevo Departamento</flux:button>
-        </flux:modal.trigger>
+        <!-- Botón para abrir modal de creación protegido con permiso -->
+        @can('admin.departamentos.store')
+            <flux:modal.trigger name="crear-departamento">
+                <flux:button variant="primary" icon="plus" color="blue">Nuevo Departamento</flux:button>
+            </flux:modal.trigger>
+        @endcan
     </div>
 
     <flux:separator variant="subtle" class="mb-6" />
@@ -24,7 +26,6 @@
         .toggle-checkbox:not(:checked) + .toggle-label {
             background-color: #ef4444;
         }
-        /* Ocultar texto OFF cuando está activo y ON cuando está inactivo */
         .toggle-checkbox:checked ~ .toggle-label .text-off {
             opacity: 0;
             visibility: hidden;
@@ -78,77 +79,83 @@
                         </td>
                         <td class="px-4 py-3 border border-gray-200 dark:border-zinc-700 whitespace-nowrap text-center">
                             <div class="flex justify-center items-center gap-1.5">
-                                <!-- Botón Editar (Modal Trigger) -->
-                                <flux:modal.trigger name="editar-departamento-{{ $dep->id }}">
-                                    <button type="button" class="inline-flex items-center px-3 py-1.5 bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-medium rounded-md shadow-sm transition">
-                                        <i class="fas fa-pencil-alt mr-1.5"></i> Editar
-                                    </button>
-                                </flux:modal.trigger>
+                                <!-- Botón Editar protegido -->
+                                @can('admin.departamentos.update')
+                                    <flux:modal.trigger name="editar-departamento-{{ $dep->id }}">
+                                        <button type="button" class="inline-flex items-center px-3 py-1.5 bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-medium rounded-md shadow-sm transition">
+                                            <i class="fas fa-pencil-alt mr-1.5"></i> Editar
+                                        </button>
+                                    </flux:modal.trigger>
+                                @endcan
 
-                                <!-- Formulario Eliminar -->
-                                <form action="{{ route('admin.departamentos.destroy', $dep) }}" method="POST" class="inline-flex" id="miFormularioEliminarDep{{ $dep->id }}">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="inline-flex items-center px-3 py-1.5 bg-red-500 hover:bg-red-600 text-white text-xs font-medium rounded-md shadow-sm transition cursor-pointer" onclick="preguntarEliminarDep{{ $dep->id }}(event)">
-                                        <i class="fas fa-trash-alt mr-1.5"></i> Eliminar
-                                    </button>
-                                </form>
+                                <!-- Botón Eliminar protegido -->
+                                @can('admin.departamentos.destroy')
+                                    <form action="{{ route('admin.departamentos.destroy', $dep) }}" method="POST" class="inline-flex" id="miFormularioEliminarDep{{ $dep->id }}">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="inline-flex items-center px-3 py-1.5 bg-red-500 hover:bg-red-600 text-white text-xs font-medium rounded-md shadow-sm transition cursor-pointer" onclick="preguntarEliminarDep{{ $dep->id }}(event)">
+                                            <i class="fas fa-trash-alt mr-1.5"></i> Eliminar
+                                        </button>
+                                    </form>
 
-                                <script>
-                                    function preguntarEliminarDep{{ $dep->id }}(event) {
-                                        event.preventDefault();
-                                        Swal.fire({
-                                            title: '¿Desea eliminar este departamento?',
-                                            icon: 'question',
-                                            showDenyButton: true,
-                                            confirmButtonText: 'Eliminar',
-                                            confirmButtonColor: '#a5161d',
-                                            denyButtonColor: '#270a0a',
-                                            denyButtonText: 'Cancelar',
-                                        }).then((result) => {
-                                            if (result.isConfirmed) {
-                                                document.getElementById('miFormularioEliminarDep{{ $dep->id }}').submit();
-                                            }
-                                        });
-                                    }
-                                </script>
+                                    <script>
+                                        function preguntarEliminarDep{{ $dep->id }}(event) {
+                                            event.preventDefault();
+                                            Swal.fire({
+                                                title: '¿Desea eliminar este departamento?',
+                                                icon: 'question',
+                                                showDenyButton: true,
+                                                confirmButtonText: 'Eliminar',
+                                                confirmButtonColor: '#a5161d',
+                                                denyButtonColor: '#270a0a',
+                                                denyButtonText: 'Cancelar',
+                                            }).then((result) => {
+                                                if (result.isConfirmed) {
+                                                    document.getElementById('miFormularioEliminarDep{{ $dep->id }}').submit();
+                                                }
+                                            });
+                                        }
+                                    </script>
+                                @endcan
                             </div>
                         </td>
                     </tr>
 
-                    <!-- Modal de Edición para cada registro -->
-                    <flux:modal name="editar-departamento-{{ $dep->id }}" class="md:w-96">
-                        <form action="{{ route('admin.departamentos.update', $dep) }}" method="POST" class="space-y-6">
-                            @csrf
-                            @method('PUT')
-                            <div>
-                                <flux:heading size="lg">Editar Departamento</flux:heading>
-                                <flux:subheading>Modifica los datos del departamento.</flux:subheading>
-                            </div>
-
-                            <flux:input label="Nombre" name="nombre" value="{{ old('nombre', $dep->nombre) }}" required />
-                            <flux:input label="Sigla" name="sigla" value="{{ old('sigla', $dep->sigla) }}" placeholder="Ej: SC" />
-
-                            <!-- Toggle Switch ON/OFF -->
-                            <div class="flex flex-col gap-1.5">
-                                <label class="text-sm font-medium text-gray-700 dark:text-gray-300">Estado</label>
-                                <div class="relative inline-block w-28 select-none transition duration-250 ease-in">
-                                    <input type="checkbox" name="estado" value="1" id="toggle-edit-{{ $dep->id }}" {{ $dep->estado ? 'checked' : '' }} class="toggle-checkbox absolute block w-7 h-7 rounded-full bg-white border-4 appearance-none cursor-pointer z-10 top-0.5 left-0.5 transition-all duration-300 shadow-md checked:translate-x-[72px]" />
-                                    <label for="toggle-edit-{{ $dep->id }}" class="toggle-label block overflow-hidden h-8 rounded-full cursor-pointer transition-colors duration-300 shadow-inner relative">
-                                        <span class="text-on absolute text-white text-xs font-bold tracking-wider left-3.5 top-2 select-none">ON</span>
-                                        <span class="text-off absolute text-white text-xs font-bold tracking-wider right-3.5 top-2 select-none">OFF</span>
-                                    </label>
+                    <!-- Modal de Edición protegido (solo se renderiza si tiene permiso de actualizar) -->
+                    @can('admin.departamentos.update')
+                        <flux:modal name="editar-departamento-{{ $dep->id }}" class="md:w-96">
+                            <form action="{{ route('admin.departamentos.update', $dep) }}" method="POST" class="space-y-6">
+                                @csrf
+                                @method('PUT')
+                                <div>
+                                    <flux:heading size="lg">Editar Departamento</flux:heading>
+                                    <flux:subheading>Modifica los datos del departamento.</flux:subheading>
                                 </div>
-                            </div>
 
-                            <div class="flex justify-end gap-2">
-                                <flux:modal.close>
-                                    <flux:button variant="subtle">Cancelar</flux:button>
-                                </flux:modal.close>
-                                <flux:button type="submit" variant="primary">Actualizar</flux:button>
-                            </div>
-                        </form>
-                    </flux:modal>
+                                <flux:input label="Nombre" name="nombre" value="{{ old('nombre', $dep->nombre) }}" required />
+                                <flux:input label="Sigla" name="sigla" value="{{ old('sigla', $dep->sigla) }}" placeholder="Ej: SC" />
+
+                                <!-- Toggle Switch ON/OFF -->
+                                <div class="flex flex-col gap-1.5">
+                                    <label class="text-sm font-medium text-gray-700 dark:text-gray-300">Estado</label>
+                                    <div class="relative inline-block w-28 select-none transition duration-250 ease-in">
+                                        <input type="checkbox" name="estado" value="1" id="toggle-edit-{{ $dep->id }}" {{ $dep->estado ? 'checked' : '' }} class="toggle-checkbox absolute block w-7 h-7 rounded-full bg-white border-4 appearance-none cursor-pointer z-10 top-0.5 left-0.5 transition-all duration-300 shadow-md checked:translate-x-[72px]" />
+                                        <label for="toggle-edit-{{ $dep->id }}" class="toggle-label block overflow-hidden h-8 rounded-full cursor-pointer transition-colors duration-300 shadow-inner relative">
+                                            <span class="text-on absolute text-white text-xs font-bold tracking-wider left-3.5 top-2 select-none">ON</span>
+                                            <span class="text-off absolute text-white text-xs font-bold tracking-wider right-3.5 top-2 select-none">OFF</span>
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <div class="flex justify-end gap-2">
+                                    <flux:modal.close>
+                                        <flux:button variant="subtle">Cancelar</flux:button>
+                                    </flux:modal.close>
+                                    <flux:button type="submit" variant="primary">Actualizar</flux:button>
+                                </div>
+                            </form>
+                        </flux:modal>
+                    @endcan
 
                 @empty
                     <tr>
@@ -182,38 +189,40 @@
         </div>
     @endif
 
-    <!-- Modal de Creación -->
-    <flux:modal name="crear-departamento" class="md:w-96">
-        <form action="{{ route('admin.departamentos.store') }}" method="POST" class="space-y-6">
-            @csrf
-            <div>
-                <flux:heading size="lg">Nuevo Departamento</flux:heading>
-                <flux:subheading>Registra una nueva región o departamento.</flux:subheading>
-            </div>
-
-            <flux:input label="Nombre" name="nombre" placeholder="Ej: Santa Cruz" required />
-            <flux:input label="Sigla" name="sigla" placeholder="Ej: SC" />
-
-            <!-- Toggle Switch ON/OFF -->
-            <div class="flex flex-col gap-1.5">
-                <label class="text-sm font-medium text-gray-700 dark:text-gray-300">Estado</label>
-                <div class="relative inline-block w-28 select-none transition duration-250 ease-in">
-                    <input type="checkbox" name="estado" value="1" id="toggle-nuevo" checked class="toggle-checkbox absolute block w-7 h-7 rounded-full bg-white border-4 appearance-none cursor-pointer z-10 top-0.5 left-0.5 transition-all duration-300 shadow-md checked:translate-x-[72px]" />
-                    <label for="toggle-nuevo" class="toggle-label block overflow-hidden h-8 rounded-full cursor-pointer transition-colors duration-300 shadow-inner relative">
-                        <span class="text-on absolute text-white text-xs font-bold tracking-wider left-3.5 top-2 select-none">ON</span>
-                        <span class="text-off absolute text-white text-xs font-bold tracking-wider right-3.5 top-2 select-none">OFF</span>
-                    </label>
+    <!-- Modal de Creación protegido -->
+    @can('admin.departamentos.store')
+        <flux:modal name="crear-departamento" class="md:w-96">
+            <form action="{{ route('admin.departamentos.store') }}" method="POST" class="space-y-6">
+                @csrf
+                <div>
+                    <flux:heading size="lg">Nuevo Departamento</flux:heading>
+                    <flux:subheading>Registra una nueva región o departamento.</flux:subheading>
                 </div>
-            </div>
 
-            <div class="flex justify-end gap-2">
-                <flux:modal.close>
-                    <flux:button variant="subtle">Cancelar</flux:button>
-                </flux:modal.close>
-                <flux:button type="submit" variant="primary">Guardar</flux:button>
-            </div>
-        </form>
-    </flux:modal>
+                <flux:input label="Nombre" name="nombre" placeholder="Ej: Santa Cruz" required />
+                <flux:input label="Sigla" name="sigla" placeholder="Ej: SC" />
+
+                <!-- Toggle Switch ON/OFF -->
+                <div class="flex flex-col gap-1.5">
+                    <label class="text-sm font-medium text-gray-700 dark:text-gray-300">Estado</label>
+                    <div class="relative inline-block w-28 select-none transition duration-250 ease-in">
+                        <input type="checkbox" name="estado" value="1" id="toggle-nuevo" checked class="toggle-checkbox absolute block w-7 h-7 rounded-full bg-white border-4 appearance-none cursor-pointer z-10 top-0.5 left-0.5 transition-all duration-300 shadow-md checked:translate-x-[72px]" />
+                        <label for="toggle-nuevo" class="toggle-label block overflow-hidden h-8 rounded-full cursor-pointer transition-colors duration-300 shadow-inner relative">
+                            <span class="text-on absolute text-white text-xs font-bold tracking-wider left-3.5 top-2 select-none">ON</span>
+                            <span class="text-off absolute text-white text-xs font-bold tracking-wider right-3.5 top-2 select-none">OFF</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="flex justify-end gap-2">
+                    <flux:modal.close>
+                        <flux:button variant="subtle">Cancelar</flux:button>
+                    </flux:modal.close>
+                    <flux:button type="submit" variant="primary">Guardar</flux:button>
+                </div>
+            </form>
+        </flux:modal>
+    @endcan
 
     @if (session('success'))
         <script>

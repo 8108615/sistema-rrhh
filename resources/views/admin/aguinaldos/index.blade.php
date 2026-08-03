@@ -1,4 +1,16 @@
 <x-layouts::app title="Gestión de Aguinaldos">
+    @php
+        $ajusteDivisa = \App\Models\Ajuste::first()->divisas ?? 'BOB';
+        $jsonPath = public_path('divisas.json');
+        $simboloMoneda = $ajusteDivisa;
+        if (file_exists($jsonPath)) {
+            $divisasData = json_decode(file_get_contents($jsonPath), true);
+            if (isset($divisasData[$ajusteDivisa]['symbol'])) {
+                $simboloMoneda = $divisasData[$ajusteDivisa]['symbol'];
+            }
+        }
+    @endphp
+
     <div class="relative mb-6 w-full flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
             <flux:heading size="xl" level="1">Gestión de Aguinaldos</flux:heading>
@@ -6,20 +18,26 @@
         </div>
         <div class="flex flex-wrap items-center gap-2">
             <!-- Botón de Cálculo Masivo -->
-            <button type="button" onclick="openCalculoModal()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-lg shadow-sm transition flex items-center gap-2 text-sm cursor-pointer">
-                <i class="fas fa-calculator"></i> Cálculo Masivo
-            </button>
+            @can('admin.aguinaldos.calcular')
+                <button type="button" onclick="openCalculoModal()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-lg shadow-sm transition flex items-center gap-2 text-sm cursor-pointer">
+                    <i class="fas fa-calculator"></i> Cálculo Masivo
+                </button>
+            @endcan
 
             <!-- Botón de Imprimir Planilla General (Aparece solo si hay registros calculados) -->
             @if(isset($aguinaldos) && $aguinaldos->count() > 0)
-                <a href="{{ route('admin.aguinaldos.print.general', ['gestion' => $gestion, 'tipo' => $tipo]) }}" target="_blank" class="px-4 py-2 bg-zinc-700 hover:bg-zinc-800 text-white font-semibold rounded-lg shadow-sm transition flex items-center gap-2 text-sm">
-                    <i class="fas fa-print"></i> Imprimir Planilla [{{ $tipo }}]
-                </a>
+                @can('admin.aguinaldos.print.general')
+                    <a href="{{ route('admin.aguinaldos.print.general', ['gestion' => $gestion, 'tipo' => $tipo]) }}" target="_blank" class="px-4 py-2 bg-zinc-700 hover:bg-zinc-800 text-white font-semibold rounded-lg shadow-sm transition flex items-center gap-2 text-sm">
+                        <i class="fas fa-print"></i> Imprimir Planilla [{{ $tipo }}]
+                    </a>
+                @endcan
             @endif
             <!-- Botón Nuevo Registro Individual -->
-            <a href="{{ route('admin.aguinaldos.create') }}">
-                <flux:button variant="primary" icon="plus" color="blue">Nuevo Registro</flux:button>
-            </a>
+            @can('admin.aguinaldos.create')
+                <a href="{{ route('admin.aguinaldos.create') }}">
+                    <flux:button variant="primary" icon="plus" color="blue">Nuevo Registro</flux:button>
+                </a>
+            @endcan
         </div>
     </div>
 
@@ -74,7 +92,13 @@
             <tbody class="bg-white dark:bg-zinc-800 text-center">
                 @forelse ($aguinaldos as $item)
                     <tr class="hover:bg-blue-50 dark:hover:bg-zinc-700/50 transition">
-                        <td class="px-3 py-3 border border-gray-200 dark:border-zinc-700 text-sm">{{ $loop->iteration }}</td>
+                        <td class="px-3 py-3 border border-gray-200 dark:border-zinc-700 text-sm">
+                            @if(method_exists($aguinaldos, 'currentPage'))
+                                {{ ($aguinaldos->currentPage() - 1) * $aguinaldos->perPage() + $loop->iteration }}
+                            @else
+                                {{ $loop->iteration }}
+                            @endif
+                        </td>
                         <td class="px-4 py-3 border border-gray-200 dark:border-zinc-700 text-sm text-left font-semibold">
                             {{ $item->empleado->nombre ?? 'N/D' }} {{ $item->empleado->apellido ?? '' }}
                             <div class="text-xs text-gray-500 font-normal">CI: {{ $item->empleado->ci ?? 'N/D' }}</div>
@@ -83,13 +107,13 @@
                             {{ $item->empleado->area->nombre ?? 'Sin Área' }}
                         </td>
                         <td class="px-4 py-3 border border-gray-200 dark:border-zinc-700 text-sm font-mono">
-                            Bs. {{ number_format($item->ultimo_salario, 2, ',', '.') }}
+                            {{ $simboloMoneda }} {{ number_format($item->ultimo_salario, 2, ',', '.') }}
                         </td>
                         <td class="px-4 py-3 border border-gray-200 dark:border-zinc-700 text-sm">
                             {{ $item->meses_trabajados }} meses ({{ $item->dias_trabajados }} días)
                         </td>
                         <td class="px-4 py-3 border border-gray-200 dark:border-zinc-700 text-sm font-bold font-mono text-emerald-600 dark:text-emerald-400">
-                            Bs. {{ number_format($item->monto_pagar, 2, ',', '.') }}
+                            {{ $simboloMoneda }} {{ number_format($item->monto_pagar, 2, ',', '.') }}
                         </td>
                         <td class="px-4 py-3 border border-gray-200 dark:border-zinc-700 text-sm">
                             <span class="px-2.5 py-1 text-xs font-semibold rounded-full {{ $item->estado == 'Pagado' ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300' : 'bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300' }}">
@@ -99,46 +123,54 @@
                         <td class="px-4 py-3 border border-gray-200 dark:border-zinc-700">
                             <div class="flex justify-center items-center gap-1.5">
                                 <!-- Ver -->
-                                <a href="{{ route('admin.aguinaldos.show', $item->id) }}" class="px-3 py-1.5 bg-sky-500 hover:bg-sky-600 text-white text-xs font-medium rounded-md shadow-sm transition flex items-center">
-                                    <i class="fas fa-eye mr-1"></i> Ver
-                                </a>
+                                @can('admin.aguinaldos.show')
+                                    <a href="{{ route('admin.aguinaldos.show', $item->id) }}" class="px-3 py-1.5 bg-sky-500 hover:bg-sky-600 text-white text-xs font-medium rounded-md shadow-sm transition flex items-center">
+                                        <i class="fas fa-eye mr-1"></i> Ver
+                                    </a>
+                                @endcan
 
-                                <a href="{{ route('admin.aguinaldos.edit', $item->id) }}" class="px-3 py-1.5 bg-green-500 hover:bg-green-600 text-white text-xs font-medium rounded-md shadow-sm transition flex items-center">
-                                    <i class="fas fa-edit mr-1"></i> Editar
-                                </a>
+                                @can('admin.aguinaldos.edit')
+                                    <a href="{{ route('admin.aguinaldos.edit', $item->id) }}" class="px-3 py-1.5 bg-green-500 hover:bg-green-600 text-white text-xs font-medium rounded-md shadow-sm transition flex items-center">
+                                        <i class="fas fa-edit mr-1"></i> Editar
+                                    </a>
+                                @endcan
 
                                 <!-- Imprimir -->
-                                <a href="{{ route('admin.aguinaldos.print', $item->id) }}" target="_blank" class="px-3 py-1.5 bg-zinc-600 hover:bg-zinc-700 text-white text-xs font-medium rounded-md shadow-sm transition flex items-center">
-                                    <i class="fas fa-print mr-1"></i> Imprimir
-                                </a>
+                                @can('admin.aguinaldos.print')
+                                    <a href="{{ route('admin.aguinaldos.print', $item->id) }}" target="_blank" class="px-3 py-1.5 bg-zinc-600 hover:bg-zinc-700 text-white text-xs font-medium rounded-md shadow-sm transition flex items-center">
+                                        <i class="fas fa-print mr-1"></i> Imprimir
+                                    </a>
+                                @endcan
 
                                 <!-- Eliminar -->
-                                <form action="{{ route('admin.aguinaldos.destroy', $item->id) }}" method="POST" class="inline-flex delete-form-aguinaldo" id="formEliminarAguinaldo{{ $item->id }}">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="px-3 py-1.5 bg-red-500 hover:bg-red-600 text-white text-xs font-medium rounded-md shadow-sm transition cursor-pointer flex items-center" onclick="confirmarEliminacionAguinaldo{{ $item->id }}(event)">
-                                        <i class="fas fa-trash-alt mr-1"></i> Eliminar
-                                    </button>
-                                </form>
-                                <script>
-                                    function confirmarEliminacionAguinaldo{{ $item->id }}(e) {
-                                        e.preventDefault();
-                                        Swal.fire({
-                                            title: '¿Estás seguro?',
-                                            text: "¡No podrás revertir esta acción!",
-                                            icon: 'warning',
-                                            showCancelButton: true,
-                                            confirmButtonColor: '#d33',
-                                            cancelButtonColor: '#3085d6',
-                                            confirmButtonText: 'Sí, eliminar',
-                                            cancelButtonText: 'Cancelar'
-                                        }).then((result) => {
-                                            if (result.isConfirmed) {
-                                                document.getElementById('formEliminarAguinaldo{{ $item->id }}').submit();
-                                            }
-                                        });
-                                    }
-                                </script>
+                                @can('admin.aguinaldos.destroy')
+                                    <form action="{{ route('admin.aguinaldos.destroy', $item->id) }}" method="POST" class="inline-flex delete-form-aguinaldo" id="formEliminarAguinaldo{{ $item->id }}">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="px-3 py-1.5 bg-red-500 hover:bg-red-600 text-white text-xs font-medium rounded-md shadow-sm transition cursor-pointer flex items-center" onclick="confirmarEliminacionAguinaldo{{ $item->id }}(event)">
+                                            <i class="fas fa-trash-alt mr-1"></i> Eliminar
+                                        </button>
+                                    </form>
+                                    <script>
+                                        function confirmarEliminacionAguinaldo{{ $item->id }}(e) {
+                                            e.preventDefault();
+                                            Swal.fire({
+                                                title: '¿Estás seguro?',
+                                                text: "¡No podrás revertir esta acción!",
+                                                icon: 'warning',
+                                                showCancelButton: true,
+                                                confirmButtonColor: '#d33',
+                                                cancelButtonColor: '#3085d6',
+                                                confirmButtonText: 'Sí, eliminar',
+                                                cancelButtonText: 'Cancelar'
+                                            }).then((result) => {
+                                                if (result.isConfirmed) {
+                                                    document.getElementById('formEliminarAguinaldo{{ $item->id }}').submit();
+                                                }
+                                            });
+                                        }
+                                    </script>
+                                @endcan
                             </div>
                         </td>
                     </tr>
@@ -152,6 +184,10 @@
             </tbody>
         </table>
     </div>
+
+    @if (method_exists($aguinaldos, 'hasPages') && $aguinaldos->hasPages())
+        <div class="mt-4">{{ $aguinaldos->appends(['gestion' => $gestion, 'tipo' => $tipo])->links() }}</div>
+    @endif
 
     <!-- Script para el Modal de Cálculo Masivo -->
     <script>
