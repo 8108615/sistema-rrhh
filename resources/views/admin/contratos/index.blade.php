@@ -42,8 +42,9 @@
                     <flux:select name="estado" placeholder="Filtrar por estado" onchange="this.form.submit()">
                         <option value="">Todos los estados</option>
                         <option value="Activo" {{ ($estado ?? '') == 'Activo' ? 'selected' : '' }}>Activo</option>
+                        <option value="Vencido" {{ ($estado ?? '') == 'Vencido' ? 'selected' : '' }}>Vencido</option>
                         <option value="Finalizado" {{ ($estado ?? '') == 'Finalizado' ? 'selected' : '' }}>Finalizado</option>
-                        <option value="Cancelado" {{ ($estado ?? '') == 'Cancelado' ? 'selected' : '' }}>Cancelado</option>
+                        <option value="Anulado" {{ ($estado ?? '') == 'Anulado' ? 'selected' : '' }}>Anulado</option>
                     </flux:select>
                 </div>
             </form>
@@ -84,28 +85,44 @@
                                 </td>
                                 <td class="py-3 px-4">
                                     @php
-                                        $badgeVariant = match($contrato->estado) {
-                                            'Activo' => 'success',
-                                            'Finalizado' => 'warning',
-                                            default => 'danger',
+                                        $customBg = match($contrato->estado) {
+                                            'Activo' => 'bg-emerald-500 text-white border border-emerald-600',
+                                            'Vencido' => 'bg-red-500 text-white border border-red-600',
+                                            'Finalizado' => 'bg-amber-500 text-white border border-amber-600',
+                                            'Anulado' => 'bg-red-500 text-white border border-red-600',
+                                            default => 'bg-red-500 text-white border border-red-600',
                                         };
                                     @endphp
-                                    <flux:badge variant="{{ $badgeVariant }}" size="sm">{{ $contrato->estado }}</flux:badge>
+                                    <span class="inline-flex items-center justify-center px-3 py-1 text-xs font-semibold rounded-full {{ $customBg }}">
+                                        {{ $contrato->estado }}
+                                    </span>
                                 </td>
                                 <td class="py-3 px-4">
-                                    <flux:button variant="ghost" size="sm" href="{{ route('admin.contratos.imprimir', $contrato->id) }}" icon="printer" target="_blank">
+                                    <!-- Botón Ver Contrato (Naranja) -->
+                                    <flux:button variant="primary" size="sm" href="{{ route('admin.contratos.imprimir', $contrato->id) }}" icon="printer" target="_blank" class="bg-amber-500 hover:bg-amber-600">
                                         Ver Contrato
                                     </flux:button>
                                 </td>
                                 <td class="py-3 px-4 text-right">
                                     <div class="flex items-center justify-end gap-2">
-                                        <flux:button variant="ghost" size="sm" href="{{ route('admin.contratos.show', $contrato->id) }}" icon="eye" />
-                                        <flux:button variant="ghost" size="sm" href="{{ route('admin.contratos.edit', $contrato->id) }}" icon="pencil-square" />
 
-                                        <form action="{{ route('admin.contratos.destroy', $contrato->id) }}" method="POST" onsubmit="return confirm('¿Estás seguro de eliminar este contrato?');">
+                                        <!-- Botón Ver (Azul) -->
+                                        <flux:button variant="primary" size="sm" href="{{ route('admin.contratos.show', $contrato->id) }}" icon="eye" class="bg-blue-500 hover:bg-blue-600">
+                                            Ver
+                                        </flux:button>
+
+                                        <!-- Botón Editar (Verde) -->
+                                        <flux:button variant="primary" size="sm" href="{{ route('admin.contratos.edit', $contrato->id) }}" icon="pencil-square" class="bg-emerald-600 hover:bg-emerald-700">
+                                            Editar
+                                        </flux:button>
+
+                                        <!-- Formulario y Botón Eliminar con SweetAlert2 -->
+                                        <form action="{{ route('admin.contratos.destroy', $contrato->id) }}" method="POST" id="delete-form-{{ $contrato->id }}" class="inline">
                                             @csrf
                                             @method('DELETE')
-                                            <flux:button variant="ghost" size="sm" type="submit" icon="trash" class="text-red-600 hover:text-red-700" />
+                                            <flux:button variant="danger" size="sm" type="button" icon="trash" onclick="confirmDelete({{ $contrato->id }})">
+                                                Eliminar
+                                            </flux:button>
                                         </form>
                                     </div>
                                 </td>
@@ -127,4 +144,24 @@
             </div>
         </div>
     </div>
+
+    <!-- Script de confirmación con SweetAlert2 -->
+    <script>
+        function confirmDelete(id) {
+            Swal.fire({
+                title: '¿Estás seguro?',
+                text: "¡No podrás revertir esto!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Sí, ¡eliminar!',
+                cancelButtonText: 'Cancelar'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    document.getElementById('delete-form-' + id).submit();
+                }
+            })
+        }
+    </script>
 </x-layouts::app>

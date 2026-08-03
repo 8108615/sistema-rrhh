@@ -24,7 +24,6 @@
             <div class="bg-white dark:bg-zinc-900 p-5 rounded-xl border border-zinc-200 dark:border-zinc-800 shadow-sm flex items-center justify-between">
                 <div>
                     <p class="text-xs font-medium uppercase tracking-wider text-zinc-500 dark:text-zinc-400">Empleados Activos</p>
-                    {{-- Usaremos variables que definiremos en el Paso 2 --}}
                     <h3 class="text-3xl font-extrabold text-zinc-900 dark:text-zinc-100 mt-1">{{ $totalEmpleados ?? 0 }}</h3>
                     <span class="text-xs text-emerald-600 dark:text-emerald-400 font-medium flex items-center gap-1 mt-1">
                         ● Personal registrado
@@ -49,13 +48,13 @@
                 </div>
             </div>
 
-            <!-- Contratos Activos -->
+            <!-- Contratos Vigentes -->
             <div class="bg-white dark:bg-zinc-900 p-5 rounded-xl border border-zinc-200 dark:border-zinc-800 shadow-sm flex items-center justify-between">
                 <div>
                     <p class="text-xs font-medium uppercase tracking-wider text-zinc-500 dark:text-zinc-400">Contratos Vigentes</p>
                     <h3 class="text-3xl font-extrabold text-zinc-900 dark:text-zinc-100 mt-1">{{ $totalContratosActivos ?? 0 }}</h3>
                     <span class="text-xs text-blue-600 dark:text-blue-400 font-medium flex items-center gap-1 mt-1">
-                        Cercanos a vencer
+                        Activos en sistema
                     </span>
                 </div>
                 <div class="p-3 bg-indigo-50 dark:bg-indigo-950/50 text-indigo-600 dark:text-indigo-400 rounded-full">
@@ -106,7 +105,7 @@
                                         {{ optional($contrato->empleado)->nombre }} {{ optional($contrato->empleado)->apellido }}
                                     </td>
                                     <td class="p-3">{{ $contrato->tipo_contrato }}</td>
-                                    <td class="p-3 font-semibold {{ \Carbon\Carbon::parse($contrato->fecha_fin)->isPast() ? 'text-red-600' : 'text-amber-600 dark:text-amber-400' }}">
+                                    <td class="p-3 font-semibold text-amber-600 dark:text-amber-400">
                                         {{ \Carbon\Carbon::parse($contrato->fecha_fin)->format('d/m/Y') }}
                                     </td>
                                     <td class="p-3 text-right">
@@ -115,7 +114,7 @@
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="4" class="p-6 text-center text-zinc-500 dark:text-zinc-400 italic">No hay contratos próximos a vencer.</td>
+                                    <td colspan="4" class="p-6 text-center text-zinc-500 dark:text-zinc-400 italic">No hay contratos próximos a vencer en los siguientes 30 días. 🎉</td>
                                 </tr>
                             @endforelse
                         </tbody>
@@ -137,16 +136,16 @@
                     <flux:button variant="subtle" href="{{ route('admin.empleados.index') }}" icon="user-group" class="justify-between w-full text-left">
                         Catálogo de Empleados
                     </flux:button>
-                    <flux:button variant="subtle" href="{{ route('admin.reportes.index') }}" icon="chart-bar" class="justify-between w-full text-left">
-                        Ver Reportes Globales
+                    <flux:button variant="subtle" href="{{ route('admin.aguinaldos.index') }}" icon="gift" class="justify-between w-full text-left">
+                        Módulo de Aguinaldos
                     </flux:button>
                 </div>
 
                 <div class="pt-4 mt-4 border-t border-zinc-200 dark:border-zinc-800">
-                    <h3 class="text-xs font-semibold uppercase tracking-wider text-zinc-500 dark:text-zinc-400 mb-2">Atajos de teclado</h3>
-                    <div class="flex items-center justify-between text-xs text-zinc-600 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 px-3 py-1.5 rounded-md font-mono">
-                        <span>Nuevo Empleado</span>
-                        <span class="bg-white dark:bg-zinc-900 px-2 py-0.5 rounded shadow-inner border border-zinc-200 dark:border-zinc-700">Ctrl + Alt + N</span>
+                    <h3 class="text-xs font-semibold uppercase tracking-wider text-zinc-500 dark:text-zinc-400 mb-2">Estado del Sistema</h3>
+                    <div class="flex items-center justify-between text-xs text-zinc-600 dark:text-zinc-400">
+                        <span>Base de Datos</span>
+                        <span class="text-emerald-600 dark:text-emerald-400 font-medium">Conectado (Online)</span>
                     </div>
                 </div>
             </div>

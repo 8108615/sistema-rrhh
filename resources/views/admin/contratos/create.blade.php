@@ -1,5 +1,5 @@
 <x-layouts::app title="Registrar Contrato">
-    <div class="max-w-4xl mx-auto space-y-6">
+    <div class="max-w-full mx-auto space-y-6">
         <!-- Cabecera de la sección -->
         <div class="flex items-center justify-between">
             <div>
@@ -25,8 +25,8 @@
             </flux:callout>
         @endif
 
-        <!-- Formulario -->
-        <div class="bg-white dark:bg-zinc-900 p-6 rounded-xl border border-zinc-200 dark:border-zinc-800 shadow-sm">
+        <!-- Formulario envuelto en el gran recuadro principal -->
+        <div class="bg-white dark:bg-zinc-900 p-8 rounded-xl border border-zinc-200 dark:border-zinc-800 shadow-sm">
             <form action="{{ route('admin.contratos.store') }}" method="POST" class="space-y-6">
                 @csrf
 
@@ -36,9 +36,9 @@
                         <flux:select id="empleado_id" name="empleado_id" label="Empleado" placeholder="Selecciona un empleado..." required>
                             <option value="">Selecciona un empleado...</option>
                             @foreach ($empleados as $empleado)
-                                <option value="{{ $empleado->id }}" 
-                                    data-fecha="{{ $empleado->fecha_ingreso }}" 
-                                    data-salario="{{ $empleado->salario }}" 
+                                <option value="{{ $empleado->id }}"
+                                    data-fecha="{{ $empleado->fecha_ingreso }}"
+                                    data-salario="{{ $empleado->salario }}"
                                     data-area="{{ optional($empleado->area)->nombre }}"
                                     {{ old('empleado_id') == $empleado->id ? 'selected' : '' }}>
                                     {{ $empleado->nombre }} {{ $empleado->apellido }} - CI: {{ $empleado->ci }}
@@ -77,12 +77,13 @@
 
                     <!-- Fecha de Fin -->
                     <div>
-                        <flux:input type="date" name="fecha_fin" label="Fecha de Fin (Opcional)" value="{{ old('fecha_fin') }}" description="Dejar en blanco si es indefinido o labor determinada." />
+                        <flux:input type="date" name="fecha_fin" label="Fecha de Fin (Opcional Dejar en blanco si es indefinido)" value="{{ old('fecha_fin') }}" />
                     </div>
 
-                    <!-- Salario Mensual -->
+                    <!-- Salario Mensual (Deshabilitado visualmente + Campo oculto para enviar el valor) -->
                     <div>
-                        <flux:input type="number" step="0.01" min="0" id="salario_mensual" name="salario_mensual" label="Salario Mensual (Bs.)" value="{{ old('salario_mensual') }}" placeholder="0.00" required />
+                        <flux:input type="number" step="0.01" min="0" id="salario_mensual_disabled" label="Salario Mensual (Bs.) - [Heredado de Empleados]" value="{{ old('salario_mensual') }}" placeholder="0.00" disabled />
+                        <input type="hidden" id="salario_mensual" name="salario_mensual" value="{{ old('salario_mensual') }}">
                     </div>
 
                     <!-- Estado -->
@@ -102,28 +103,23 @@
                 </div>
 
                 <!-- Botones de acción -->
-                <div class="flex items-center justify-end gap-3 pt-4 border-t border-zinc-200 dark:border-zinc-800">
+                <div class="flex items-center justify-end gap-3 pt-6 mt-6 border-t border-zinc-200 dark:border-zinc-800">
                     <flux:button variant="ghost" href="{{ route('admin.contratos.index') }}">Cancelar</flux:button>
-                    <flux:button variant="primary" type="submit">Guardar Contrato</flux:button>
+                    <flux:button variant="primary" type="submit" color="blue">Guardar Contrato</flux:button>
                 </div>
             </form>
         </div>
     </div>
 
     <!-- Script para autocompletar datos del empleado seleccionado -->
-    <!-- Script para autocompletar datos del empleado seleccionado -->
     <script>
         document.addEventListener('DOMContentLoaded', function () {
-            const empleadoSelect = document.querySelector('#empleado_id');
-            
-            // Si usas Livewire o Alpine dentro de Flux, escuchamos el cambio
             document.addEventListener('change', function (e) {
                 if (e.target && e.target.id === 'empleado_id') {
                     actualizarDatosEmpleado(e.target);
                 }
             });
 
-            // Por si acaso el componente emite un evento personalizado o cambia directamente
             const selectElement = document.querySelector('select[name="empleado_id"]');
             if (selectElement) {
                 selectElement.addEventListener('change', function () {
@@ -133,13 +129,12 @@
 
             function actualizarDatosEmpleado(select) {
                 const selectedOption = select.options ? select.options[select.selectedIndex] : null;
-                
+
                 if (selectedOption && selectedOption.value) {
                     const fechaIngreso = selectedOption.getAttribute('data-fecha');
                     const salario = selectedOption.getAttribute('data-salario');
                     const areaNombre = selectedOption.getAttribute('data-area');
 
-                    // Asignar Fecha de Inicio
                     if (fechaIngreso) {
                         const fechaInput = document.querySelector('input[name="fecha_inicio"]');
                         if (fechaInput) {
@@ -149,17 +144,20 @@
                         }
                     }
 
-                    // Asignar Salario
                     if (salario) {
-                        const salarioInput = document.querySelector('input[name="salario_mensual"]');
-                        if (salarioInput) {
-                            salarioInput.value = salario;
-                            salarioInput.dispatchEvent(new Event('input', { bubbles: true }));
-                            salarioInput.dispatchEvent(new Event('change', { bubbles: true }));
+                        // Input visual (deshabilitado)
+                        const salarioDisabledInput = document.querySelector('#salario_mensual_disabled');
+                        if (salarioDisabledInput) {
+                            salarioDisabledInput.value = salario;
+                        }
+
+                        // Input oculto que realmente envía el dato al servidor
+                        const salarioHiddenInput = document.querySelector('#salario_mensual');
+                        if (salarioHiddenInput) {
+                            salarioHiddenInput.value = salario;
                         }
                     }
 
-                    // Asignar Cargo / Área
                     if (areaNombre) {
                         const cargoSelect = document.querySelector('select[name="cargo_contrato"]');
                         if (cargoSelect) {

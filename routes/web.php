@@ -5,9 +5,10 @@ use Illuminate\Support\Facades\Route;
 Route::view('/', 'welcome')->name('home');
 
 Route::middleware(['auth', 'verified'])->group(function () {
-    Route::view('dashboard', 'dashboard')->name('dashboard');
+    Route::get('/admin/dashboard', [App\Http\Controllers\Admin\DashboardController::class, 'index'])->name('admin.dashboard.index');
+    // Si quieres que al entrar a /dashboard o /admin/dashboard redirija o cargue lo mismo:
+    Route::get('/dashboard', [App\Http\Controllers\Admin\DashboardController::class, 'index'])->name('dashboard');
 });
-
 //Rutas para ajustes
 Route::get('/admin/ajustes', [App\Http\Controllers\Admin\AjusteController::class, 'index'])->name('admin.ajustes.index')->middleware('auth');
 Route::post('/admin/ajustes', [App\Http\Controllers\Admin\AjusteController::class, 'store'])->name('admin.ajustes.store')->middleware('auth');
@@ -135,7 +136,7 @@ Route::put('/admin/contratos/{id}', [App\Http\Controllers\Admin\ContratoControll
 Route::get('/admin/contratos/{id}', [App\Http\Controllers\Admin\ContratoController::class, 'show'])->name('admin.contratos.show')->middleware('auth');
 Route::delete('/admin/contratos/{id}', [App\Http\Controllers\Admin\ContratoController::class, 'destroy'])->name('admin.contratos.destroy')->middleware('auth');
 Route::get('/admin/contratos/{id}/imprimir', [App\Http\Controllers\Admin\ContratoController::class, 'imprimir'])->name('admin.contratos.imprimir')->middleware('auth');
-
+Route::get('/admin/contratos/{id}/download-pdf', [App\Http\Controllers\Admin\ContratoController::class, 'downloadPdf'])->name('admin.contratos.download-pdf')->middleware('auth');
 
 
 require __DIR__.'/settings.php';
