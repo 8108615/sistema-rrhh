@@ -105,11 +105,7 @@
                         </flux:navlist.item>
                         @endcan
 
-                        @can('admin.rc_iva.index')
-                        <flux:navlist.item icon="receipt-percent" :href="route('admin.rc_iva.index')" :current="request()->routeIs('admin.rc_iva*')">
-                            RC-IVA (F-110)
-                        </flux:navlist.item>
-                        @endcan
+                        
                     </flux:navlist.group>
                     @endcanany
                 </flux:sidebar.group>

@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Permiso;
 use App\Models\Empleado;
+use Carbon\Carbon;
 
 class PermisoController extends Controller
 {
@@ -16,14 +17,14 @@ class PermisoController extends Controller
         $permisos = Permiso::with(['empleado.area', 'empleado'])
             ->when($buscar, function ($query, $buscar) {
                 return $query->where('tipo', 'like', "%{$buscar}%")
-                             ->orWhere('estado', 'like', "%{$buscar}%")
-                             ->orWhereHas('empleado', function ($q) use ($buscar) {
-                                 $q->where('nombre', 'like', "%{$buscar}%")
-                                   ->orWhere('apellido', 'like', "%{$buscar}%")
-                                   ->orWhere('ci', 'like', "%{$buscar}%");
-                             });
+                           ->orWhere('estado', 'like', "%{$buscar}%")
+                           ->orWhereHas('empleado', function ($q) use ($buscar) {
+                               $q->where('nombre', 'like', "%{$buscar}%")
+                                 ->orWhere('apellido', 'like', "%{$buscar}%")
+                                 ->orWhere('ci', 'like', "%{$buscar}%");
+                           });
             })
-            ->oldest() // Orden ascendente como lo preferiste en tus otros módulos
+            ->oldest()
             ->paginate(10);
 
         return view('admin.permisos.index', compact('permisos', 'buscar'));
@@ -31,7 +32,7 @@ class PermisoController extends Controller
 
     public function create()
     {
-        $empleados = Empleado::all(); // Para seleccionar a qué empleado corresponde el permiso
+        $empleados = Empleado::all(); 
         return view('admin.permisos.create', compact('empleados'));
     }
 
@@ -48,12 +49,58 @@ class PermisoController extends Controller
             'estado' => 'required|in:Pendiente,Aprobado,Rechazado',
         ]);
 
+        if ($request->tipo === 'Vacaciones') {
+            $empleado = Empleado::findOrFail($request->empleado_id);
+            $disponibles = $this->calcularDiasDisponibles($empleado);
+            
+            if ($request->dias_solicitados > $disponibles) {
+                return back()->withInput()->withErrors([
+                    'dias_solicitados' => "El empleado solo cuenta con {$disponibles} días de vacaciones disponibles."
+                ]);
+            }
+        }
+
         Permiso::create($request->all());
 
         return redirect()->route('admin.permisos.index')->with([
             'mensaje' => 'Solicitud de permiso registrada con éxito.',
             'icono' => 'success'
         ]);
+    }
+
+    private function calcularDiasDisponibles(Empleado $empleado)
+    {
+        if (!$empleado->fecha_ingreso) {
+            return 15; 
+        }
+
+        $ingreso = Carbon::parse($empleado->fecha_ingreso);
+        $hoy = Carbon::now();
+
+        $anosServicio = $ingreso->diffInYears($hoy);
+
+        if ($anosServicio < 1) {
+            return 0; 
+        }
+
+        $diasAnuales = 15;
+        if ($anosServicio >= 5 && $anosServicio < 10) {
+            $diasAnuales = 20;
+        } elseif ($anosServicio >= 10) {
+            $diasAnuales = 30;
+        }
+
+        $totalGanado = $diasAnuales * $anosServicio;
+
+        $diasUsados = Permiso::where('empleado_id', $empleado->id)
+            ->where('tipo', 'Vacaciones')
+            ->where('estado', 'Aprobado')
+            ->sum('dias_solicitados');
+
+        $disponibles = $totalGanado - $diasUsados;
+
+        // Redondeado a entero exacto
+        return max(0, round($disponibles));
     }
 
     public function edit($id)
@@ -96,12 +143,17 @@ class PermisoController extends Controller
         ]);
     }
 
-    // Método opcional para cambiar estado directamente si lo requieres luego en un botón rápido
-    public function cambiarEstado(Request $request, $id)
+    // --- NUEVO MÉTODO API PARA CONSULTAR VACACIONES VIA AJAX ---
+    public function getVacacionesEmpleado($id)
     {
-        $permiso = Permiso::findOrFail($id);
-        $permiso->update(['estado' => $request->estado]);
+        $empleado = Empleado::findOrFail($id);
+        $diasDisponibles = $this->calcularDiasDisponibles($empleado);
 
-        return redirect()->back()->with('success', 'Estado del permiso actualizado.');
+        return response()->json([
+            'dias_disponibles' => $diasDisponibles,
+            'fecha_ingreso' => $empleado->fecha_ingreso
+        ]);
     }
+
+    
 }

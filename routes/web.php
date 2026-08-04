@@ -86,6 +86,7 @@ Route::delete('/admin/pagos/{id}', [App\Http\Controllers\Admin\PagoEmpleadoContr
 // Rutas para Permisos y Vacaciones
 Route::get('/admin/permisos', [App\Http\Controllers\Admin\PermisoController::class, 'index'])->name('admin.permisos.index')->middleware(['auth', 'can:admin.permisos.index']);
 Route::get('/admin/permisos/create', [App\Http\Controllers\Admin\PermisoController::class, 'create'])->name('admin.permisos.create')->middleware(['auth', 'can:admin.permisos.create']);
+Route::get('/admin/permisos/empleado/{id}/vacaciones', [App\Http\Controllers\Admin\PermisoController::class, 'getVacacionesEmpleado'])->name('admin.permisos.vacaciones')->middleware(['auth', 'can:admin.permisos.create']);
 Route::post('/admin/permisos', [App\Http\Controllers\Admin\PermisoController::class, 'store'])->name('admin.permisos.store')->middleware(['auth', 'can:admin.permisos.create']);
 Route::get('/admin/permisos/{id}/edit', [App\Http\Controllers\Admin\PermisoController::class, 'edit'])->name('admin.permisos.edit')->middleware(['auth', 'can:admin.permisos.edit']);
 Route::put('/admin/permisos/{id}', [App\Http\Controllers\Admin\PermisoController::class, 'update'])->name('admin.permisos.update')->middleware(['auth', 'can:admin.permisos.edit']);
@@ -137,11 +138,6 @@ Route::delete('/admin/contratos/{id}', [App\Http\Controllers\Admin\ContratoContr
 Route::get('/admin/contratos/{id}/imprimir', [App\Http\Controllers\Admin\ContratoController::class, 'imprimir'])->name('admin.contratos.imprimir')->middleware(['auth', 'can:admin.contratos.index']);
 Route::get('/admin/contratos/{id}/download-pdf', [App\Http\Controllers\Admin\ContratoController::class, 'downloadPdf'])->name('admin.contratos.download-pdf')->middleware(['auth', 'can:admin.contratos.index']);
 
-// Rutas para RC-IVA (Formulario 110)
-Route::get('/admin/rc-iva', [App\Http\Controllers\Admin\RcIvaController::class, 'index'])->name('admin.rc_iva.index')->middleware(['auth', 'can:admin.rc_iva.index']);
-Route::get('/admin/rc-iva/create', [App\Http\Controllers\Admin\RcIvaController::class, 'create'])->name('admin.rc_iva.create')->middleware(['auth', 'can:admin.rc_iva.create']);
-Route::post('/admin/rc-iva', [App\Http\Controllers\Admin\RcIvaController::class, 'store'])->name('admin.rc_iva.store')->middleware(['auth', 'can:admin.rc_iva.create']);
-Route::delete('/admin/rc-iva/{rcIva}', [App\Http\Controllers\Admin\RcIvaController::class, 'destroy'])->name('admin.rc_iva.destroy')->middleware(['auth', 'can:admin.rc_iva.destroy']);
 
 
 

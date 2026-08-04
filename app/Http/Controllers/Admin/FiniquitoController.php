@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Ajuste;
 use App\Models\Finiquito;
 use App\Models\Empleado;
+use App\Models\Permiso;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 
@@ -32,6 +33,36 @@ class FiniquitoController extends Controller
     public function create()
     {
         $empleados = Empleado::all();
+        
+        $anioActual = Carbon::now()->year;
+        
+        foreach ($empleados as $empleado) {
+            $fechaIngreso = Carbon::parse($empleado->fecha_ingreso);
+            $aniosAntiguedad = $fechaIngreso->diffInYears(Carbon::now());
+            
+            $diasVacacionAnual = 15;
+            if ($aniosAntiguedad >= 10) {
+                $diasVacacionAnual = 30;
+            } elseif ($aniosAntiguedad >= 5) {
+                $diasVacacionAnual = 20;
+            }
+            
+            $diasTomados = Permiso::where('empleado_id', $empleado->id)
+                ->where('estado', 'Aprobado')
+                ->where('tipo', 'Vacaciones')
+                ->whereYear('fecha_inicio', $anioActual)
+                ->sum('dias_solicitados');
+            
+            $hoy = Carbon::now();
+            $mesesTrabajadosAnio = ($fechaIngreso->year == $anioActual) 
+                ? $fechaIngreso->diffInMonths($hoy) 
+                : $fechaIngreso->copy()->startOfYear()->diffInMonths($hoy);
+            
+            $diasAcumuladosProporcionales = ($diasVacacionAnual / 12) * $mesesTrabajadosAnio;
+
+            $empleado->vacaciones_disponibles = max(0, round($diasAcumuladosProporcionales - $diasTomados, 2));
+        }
+
         return view('admin.finiquitos.create', compact('empleados'));
     }
 
@@ -44,58 +75,29 @@ class FiniquitoController extends Controller
             'causal_retiro' => 'required|string',
             'ultimo_salario' => 'nullable|numeric|min:0',
             'promedio_tres_salarios' => 'nullable|numeric|min:0',
+            'anos_servicio' => 'nullable|numeric|min:0',
+            'monto_indemnizacion' => 'nullable|numeric|min:0',
+            'monto_desahucio' => 'nullable|numeric|min:0',
+            'monto_aguinaldo' => 'nullable|numeric|min:0',
+            'monto_vacacion' => 'nullable|numeric|min:0',
             'observaciones' => 'nullable|string',
         ]);
 
-        // Buscamos al empleado para asegurar un respaldo directo de su campo 'salario'
         $empleado = Empleado::findOrFail($request->empleado_id);
-
-        // Si el formulario no envió los sueldos, usamos por defecto el salario del empleado
         $ultimo = $request->filled('ultimo_salario') ? $request->ultimo_salario : $empleado->salario;
         $promedio = $request->filled('promedio_tres_salarios') ? $request->promedio_tres_salarios : $empleado->salario;
 
-        $ingreso = Carbon::parse($request->fecha_ingreso);
-        $retiro = Carbon::parse($request->fecha_retiro);
+        // Tomamos los valores exactos enviados desde la interfaz (calculados por JS)
+        $anosServicioDecimal = $request->filled('anos_servicio') ? $request->anos_servicio : 0;
+        $montoIndemnizacion = $request->filled('monto_indemnizacion') ? $request->monto_indemnizacion : 0;
+        $montoDesahucio = $request->filled('monto_desahucio') ? $request->monto_desahucio : 0;
+        $montoAguinaldo = $request->filled('monto_aguinaldo') ? $request->monto_aguinaldo : 0;
+        $montoVacacion = $request->filled('monto_vacacion') ? $request->monto_vacacion : 0;
 
-        // 1. Cálculo del tiempo de servicios (Años, Meses, Días)
-        $diff = $ingreso->diff($retiro);
-        $anios = $diff->y;
-        $meses = $diff->m;
-        $dias = $diff->d;
-
-        // Años en formato decimal para la indemnización (1 sueldo por año, 1/12 por mes, 1/360 por día)
-        $anosServicioDecimal = $anios + ($meses / 12) + ($dias / 360);
-
-        // 2. Indemnización (Sobre el promedio indemnizable de los últimos 3 meses)
-        $montoIndemnizacion = $promedio * $anosServicioDecimal;
-
-        // 3. Desahucio (3 meses de sueldo solo si es Despido Injustificado)
-        $montoDesahucio = ($request->causal_retiro === 'Despido Injustificado') ? ($ultimo * 3) : 0;
-
-        // 4. Aguinaldo proporcional (Meses y días trabajados en el año actual hasta la fecha de retiro)
-        $inicioAnio = Carbon::create($retiro->year, 1, 1);
-        $fechaCalculoAguinaldo = $ingreso->gt($inicioAnio) ? $ingreso : $inicioAnio;
-
-        $mesesAguinaldo = $fechaCalculoAguinaldo->diffInMonths($retiro);
-        $diasAguinaldo = $fechaCalculoAguinaldo->copy()->addMonths($mesesAguinaldo)->diffInDays($retiro);
-
-        $montoAguinaldo = ($ultimo / 12) * $mesesAguinaldo + (($ultimo / 12 / 30) * $diasAguinaldo);
-
-        // 5. Vacación proporcional / pendiente (Escala Bolivia: 1-5 años = 15 días, 5-10 años = 20 días, +10 años = 30 días)
-        $diasVacacionAnual = 15;
-        if ($anios >= 10) {
-            $diasVacacionAnual = 30;
-        } elseif ($anios >= 5) {
-            $diasVacacionAnual = 20;
-        }
-
-        // Cálculo de vacación correspondiente al período o proporción acumulada
-        $montoVacacion = ($ultimo / 30) * (($diasVacacionAnual / 12) * $meses + (($diasVacacionAnual / 12 / 30) * $dias));
-
-        // Total general de beneficios sociales
+        // Sumatoria total exacta de la vista
         $totalBeneficios = $montoIndemnizacion + $montoDesahucio + $montoAguinaldo + $montoVacacion;
 
-        // Guardar en la base de datos
+        // Guardar en base de datos con los valores sincronizados
         Finiquito::create([
             'empleado_id' => $request->empleado_id,
             'fecha_ingreso' => $request->fecha_ingreso,
@@ -103,7 +105,7 @@ class FiniquitoController extends Controller
             'causal_retiro' => $request->causal_retiro,
             'ultimo_salario' => $ultimo,
             'promedio_tres_salarios' => $promedio,
-            'anos_servicio' => round($anosServicioDecimal, 2),
+            'anos_servicio' => round($anosServicioDecimal, 4),
             'monto_indemnizacion' => round($montoIndemnizacion, 2),
             'monto_desahucio' => round($montoDesahucio, 2),
             'monto_vacacion' => round($montoVacacion, 2),
