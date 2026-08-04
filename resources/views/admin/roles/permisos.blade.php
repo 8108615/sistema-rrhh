@@ -23,6 +23,10 @@
         <!-- Grid de Módulos (Tarjetas) -->
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
             @foreach ($permisos as $modulo => $perms)
+                @php
+                    // Formatear el nombre del módulo para que luzca bien (ej. Rc_iva -> RC-IVA)
+                    $moduloVisual = strtoupper(str_replace('_', '-', $modulo));
+                @endphp
                 <div class="bg-white dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 rounded-xl p-5 shadow-sm flex flex-col justify-between">
                     <div>
                         <!-- Cabecera de la tarjeta del módulo -->
@@ -31,7 +35,7 @@
                                 <svg class="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"></path>
                                 </svg>
-                                {{ $modulo }}
+                                {{ $moduloVisual }}
                             </h3>
                             <button type="button" class="text-xs text-blue-600 dark:text-blue-400 hover:underline font-medium select-card-btn" data-target="card-{{ Str::slug($modulo) }}">
                                 Seleccionar todos
@@ -42,7 +46,7 @@
                         <div class="space-y-2 card-{{ Str::slug($modulo) }}">
                             @foreach ($perms as $permiso)
                                 @php
-                                    // Extraemos la acción (ej. index, create, edit, destroy, pdf, etc.)
+                                    // Extraemos la acción (ej. index, create, destroy, etc.)
                                     $partes = explode('.', $permiso->name);
                                     $accion = end($partes);
 
@@ -64,15 +68,11 @@
                                         'imprimir'=> 'Imprimir documento'
                                     ];
 
-                                    // Si existe traducción la usamos, caso contrario formateamos la palabra
                                     $nombreAmigable = $traduccionesAcciones[$accion] ?? ucfirst(str_replace('_', ' ', $accion));
-
-                                    // Opcional: Si quieres que diga "Ver Rol" en vez de solo "Ver listado", puedes adaptarlo o dejarlo limpio:
-                                    // Aquí combinamos la acción amigable con el singular del módulo si deseas:
-                                    $moduloSingular = rtrim(strtolower($modulo), 's'); // Ej: Roles -> Rol, Usuarios -> Usuario
+                                    $moduloSingular = rtrim(strtolower($moduloVisual), 's');
 
                                     if ($accion == 'index') {
-                                        $textoFinal = "Ver listado de " . strtolower($modulo);
+                                        $textoFinal = "Ver listado de " . strtolower($moduloVisual);
                                     } elseif ($accion == 'create' || $accion == 'store') {
                                         $textoFinal = "Crear / Guardar " . $moduloSingular;
                                     } elseif ($accion == 'edit' || $accion == 'update') {
@@ -82,7 +82,7 @@
                                     } elseif ($accion == 'permisos') {
                                         $textoFinal = "Asignar permisos al " . $moduloSingular;
                                     } else {
-                                        $textoFinal = $nombreAmigable . " de " . strtolower($modulo);
+                                        $textoFinal = $nombreAmigable . " de " . strtolower($moduloVisual);
                                     }
                                 @endphp
 

@@ -137,4 +137,12 @@ Route::delete('/admin/contratos/{id}', [App\Http\Controllers\Admin\ContratoContr
 Route::get('/admin/contratos/{id}/imprimir', [App\Http\Controllers\Admin\ContratoController::class, 'imprimir'])->name('admin.contratos.imprimir')->middleware(['auth', 'can:admin.contratos.index']);
 Route::get('/admin/contratos/{id}/download-pdf', [App\Http\Controllers\Admin\ContratoController::class, 'downloadPdf'])->name('admin.contratos.download-pdf')->middleware(['auth', 'can:admin.contratos.index']);
 
+// Rutas para RC-IVA (Formulario 110)
+Route::get('/admin/rc-iva', [App\Http\Controllers\Admin\RcIvaController::class, 'index'])->name('admin.rc_iva.index')->middleware(['auth', 'can:admin.rc_iva.index']);
+Route::get('/admin/rc-iva/create', [App\Http\Controllers\Admin\RcIvaController::class, 'create'])->name('admin.rc_iva.create')->middleware(['auth', 'can:admin.rc_iva.create']);
+Route::post('/admin/rc-iva', [App\Http\Controllers\Admin\RcIvaController::class, 'store'])->name('admin.rc_iva.store')->middleware(['auth', 'can:admin.rc_iva.create']);
+Route::delete('/admin/rc-iva/{rcIva}', [App\Http\Controllers\Admin\RcIvaController::class, 'destroy'])->name('admin.rc_iva.destroy')->middleware(['auth', 'can:admin.rc_iva.destroy']);
+
+
+
 require __DIR__.'/settings.php';

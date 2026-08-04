@@ -34,6 +34,8 @@ class RoleSeeder extends Seeder
             'admin.empleados.index', 'admin.empleados.create', 'admin.empleados.edit', 'admin.empleados.destroy',
             // Planillas
             'admin.planillas.index', 'admin.planillas.create', 'admin.planillas.edit', 'admin.planillas.destroy',
+            // RC-IVA (F-110)
+            'admin.rc_iva.index', 'admin.rc_iva.create', 'admin.rc_iva.destroy',
             // Pagos de empleados
             'admin.pagos.index', 'admin.pagos.create', 'admin.pagos.edit', 'admin.pagos.destroy',
             // Permisos y Vacaciones
