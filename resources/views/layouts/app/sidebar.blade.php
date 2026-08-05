@@ -6,7 +6,10 @@
     <body class="min-h-screen bg-white dark:bg-zinc-800">
         <flux:sidebar sticky collapsible="mobile" class="border-e border-zinc-200 bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900">
             <flux:sidebar.header>
-                <x-app-logo :sidebar="true" href="{{ route('dashboard') }}" wire:navigate />
+                <a href="{{ route('dashboard') }}" wire:navigate class="flex items-center gap-2 px-2 py-1 overflow-hidden">
+                    <img src="{{ asset('img/logo_thegame.png') }}" alt="Logo TheGame" class="w-8 h-8 object-contain rounded-md">
+                    <span class="text-sm font-bold text-zinc-800 dark:text-white truncate">Sistema de RRHH</span>
+                </a>
                 <flux:sidebar.collapse class="lg:hidden" />
             </flux:sidebar.header>
 
@@ -105,7 +108,7 @@
                         </flux:navlist.item>
                         @endcan
 
-                        
+
                     </flux:navlist.group>
                     @endcanany
                 </flux:sidebar.group>

@@ -32,7 +32,7 @@ class PermisoController extends Controller
 
     public function create()
     {
-        $empleados = Empleado::all(); 
+        $empleados = Empleado::all();
         return view('admin.permisos.create', compact('empleados'));
     }
 
@@ -52,7 +52,7 @@ class PermisoController extends Controller
         if ($request->tipo === 'Vacaciones') {
             $empleado = Empleado::findOrFail($request->empleado_id);
             $disponibles = $this->calcularDiasDisponibles($empleado);
-            
+
             if ($request->dias_solicitados > $disponibles) {
                 return back()->withInput()->withErrors([
                     'dias_solicitados' => "El empleado solo cuenta con {$disponibles} días de vacaciones disponibles."
@@ -71,7 +71,7 @@ class PermisoController extends Controller
     private function calcularDiasDisponibles(Empleado $empleado)
     {
         if (!$empleado->fecha_ingreso) {
-            return 15; 
+            return 15;
         }
 
         $ingreso = Carbon::parse($empleado->fecha_ingreso);
@@ -80,7 +80,7 @@ class PermisoController extends Controller
         $anosServicio = $ingreso->diffInYears($hoy);
 
         if ($anosServicio < 1) {
-            return 0; 
+            return 0;
         }
 
         $diasAnuales = 15;
@@ -124,6 +124,23 @@ class PermisoController extends Controller
         ]);
 
         $permiso = Permiso::findOrFail($id);
+
+        if ($request->tipo === 'Vacaciones') {
+            $empleado = Empleado::findOrFail($request->empleado_id);
+            $disponibles = $this->calcularDiasDisponibles($empleado);
+
+            // Si el permiso ya estaba aprobado, esos días ya fueron restados. Los sumamos temporalmente para la validación de edición.
+            if ($permiso->tipo === 'Vacaciones' && $permiso->estado === 'Aprobado') {
+                $disponibles += $permiso->dias_solicitados;
+            }
+
+            if ($request->dias_solicitados > $disponibles) {
+                return back()->withInput()->withErrors([
+                    'dias_solicitados' => "El empleado solo cuenta con {$disponibles} días de vacaciones disponibles."
+                ]);
+            }
+        }
+
         $permiso->update($request->all());
 
         return redirect()->route('admin.permisos.index')->with([
@@ -155,5 +172,5 @@ class PermisoController extends Controller
         ]);
     }
 
-    
+
 }
