@@ -1,8 +1,12 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
-Route::view('/', 'welcome')->name('home');
+Route::get('/', function () {
+    return auth()->check() ? redirect()->route('admin.dashboard.index') : redirect('/login');
+});
 
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/admin/dashboard', [App\Http\Controllers\Admin\DashboardController::class, 'index'])->name('admin.dashboard.index');
@@ -138,7 +142,14 @@ Route::delete('/admin/contratos/{id}', [App\Http\Controllers\Admin\ContratoContr
 Route::get('/admin/contratos/{id}/imprimir', [App\Http\Controllers\Admin\ContratoController::class, 'imprimir'])->name('admin.contratos.imprimir')->middleware(['auth', 'can:admin.contratos.index']);
 Route::get('/admin/contratos/{id}/download-pdf', [App\Http\Controllers\Admin\ContratoController::class, 'downloadPdf'])->name('admin.contratos.download-pdf')->middleware(['auth', 'can:admin.contratos.index']);
 
+Route::post('/logout', function (Request $request) {
+    Auth::guard('web')->logout();
 
+    $request->session()->invalidate();
+    $request->session()->regenerateToken();
+
+    return redirect('/login');
+})->name('logout');
 
 
 require __DIR__.'/settings.php';
