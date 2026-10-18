@@ -57,7 +57,7 @@
                     @endcan
 
                     <!-- Sección de Gestión de Personal / Recursos Humanos -->
-                    <!-- Solo se muestra el grupo completo si tiene al menos acceso a uno de estos módulos, o puedes condicionar ítem por ítem -->
+
                     @canany(['admin.empleados.index', 'admin.contratos.index', 'admin.permisos.index', 'admin.planillas.index', 'admin.pagos.index', 'admin.aguinaldos.index', 'admin.retroactivos.index', 'admin.finiquitos.index'])
                     <flux:navlist.group heading="Personal">
                         @can('admin.empleados.index')

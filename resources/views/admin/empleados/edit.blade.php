@@ -185,7 +185,7 @@
                 <a href="{{ route('admin.empleados.index') }}">
                     <flux:button variant="subtle">Cancelar</flux:button>
                 </a>
-                <flux:button variant="primary" type="submit" color="blue" icon="check">Actualizar Empleado</flux:button>
+                <flux:button variant="primary" type="submit" color="green" icon="check">Actualizar Empleado</flux:button>
             </div>
 
         </div>

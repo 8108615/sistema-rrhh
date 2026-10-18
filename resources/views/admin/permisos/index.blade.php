@@ -92,7 +92,7 @@
                             <div class="flex justify-center items-center gap-1.5">
                                 <!-- Editar protegido -->
                                 @can('admin.permisos.edit')
-                                    <a href="{{ route('admin.permisos.edit', $permiso->id) }}" class="px-3 py-1.5 bg-amber-500 hover:bg-amber-600 text-white text-xs font-medium rounded-md shadow-sm transition flex items-center">
+                                    <a href="{{ route('admin.permisos.edit', $permiso->id) }}" class="px-3 py-1.5 bg-green-500 hover:bg-green-600 text-white text-xs font-medium rounded-md shadow-sm transition flex items-center">
                                         <i class="fas fa-edit mr-1"></i> Editar
                                     </a>
                                 @endcan
