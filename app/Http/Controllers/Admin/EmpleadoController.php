@@ -7,6 +7,7 @@ use App\Models\Empleado;
 use App\Models\Departamento;
 use App\Models\Area;
 use Illuminate\Http\Request;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class EmpleadoController extends Controller
 {
@@ -146,5 +147,23 @@ class EmpleadoController extends Controller
         $empleado->delete();
 
         return redirect()->route('admin.empleados.index')->with('success', 'Empleado eliminado correctamente.');
+    }
+
+    public function generarCertificado($id)
+    {
+        // Buscamos al empleado junto con su cargo y área
+        $empleado = Empleado::with(['area'])->findOrFail($id);
+
+        // Cargamos la vista PDF que creamos antes
+        $pdf = Pdf::loadView('admin.empleados.pdf_certificado', compact('empleado'));
+
+        // Configuramos el tamaño del papel en formato Carta (Letter) vertical
+        $pdf->setPaper('letter', 'portrait');
+
+        // Nombre personalizado para el archivo PDF descargable
+        $nombreArchivo = 'Certificado_Trabajo_' . ($empleado->ci ?? $id) . '.pdf';
+
+        // Descarga directa del PDF en el navegador
+        return $pdf->download($nombreArchivo);
     }
 }

@@ -86,6 +86,8 @@ Route::get('/admin/pagos/{id}', [App\Http\Controllers\Admin\PagoEmpleadoControll
 Route::get('/admin/pagos/{id}/edit', [App\Http\Controllers\Admin\PagoEmpleadoController::class, 'edit'])->name('admin.pagos.edit')->middleware(['auth', 'can:admin.pagos.edit']);
 Route::put('/admin/pagos/{id}', [App\Http\Controllers\Admin\PagoEmpleadoController::class, 'update'])->name('admin.pagos.update')->middleware(['auth', 'can:admin.pagos.edit']);
 Route::delete('/admin/pagos/{id}', [App\Http\Controllers\Admin\PagoEmpleadoController::class, 'destroy'])->name('admin.pagos.destroy')->middleware(['auth', 'can:admin.pagos.destroy']);
+Route::get('/admin/empleados/{id}/certificado-pdf', [App\Http\Controllers\Admin\EmpleadoController::class, 'generarCertificado'])->name('admin.empleados.certificado.pdf')->middleware(['auth', 'can:admin.empleados.index']);
+
 
 // Rutas para Permisos y Vacaciones
 Route::get('/admin/permisos', [App\Http\Controllers\Admin\PermisoController::class, 'index'])->name('admin.permisos.index')->middleware(['auth', 'can:admin.permisos.index']);

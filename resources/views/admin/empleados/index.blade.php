@@ -117,6 +117,13 @@
                                     </a>
                                 @endcan
 
+                                <!-- Botón Certificado PDF -->
+                                @can('admin.empleados.index')
+                                    <a href="{{ route('admin.empleados.certificado.pdf', $empleado->id) }}" target="_blank" class="inline-flex items-center px-3 py-1.5 bg-purple-600 hover:bg-purple-700 text-white text-xs font-medium rounded-md shadow-sm transition cursor-pointer" title="Descargar Certificado de Trabajo">
+                                        <i class="fas fa-file-pdf mr-1.5"></i> PDF
+                                    </a>
+                                @endcan
+
                                 <!-- Botón Editar protegido -->
                                 @can('admin.empleados.edit')
                                     <a href="{{ route('admin.empleados.edit', $empleado) }}" class="inline-flex items-center px-3 py-1.5 bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-medium rounded-md shadow-sm transition cursor-pointer">
