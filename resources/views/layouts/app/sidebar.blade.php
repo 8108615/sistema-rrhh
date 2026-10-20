@@ -66,6 +66,10 @@
                         </flux:navlist.item>
                         @endcan
 
+                        <flux:navlist.item icon="clock" :href="route('admin.asistencias.index')" :current="request()->routeIs('admin.asistencias*')">
+                            Asistencias
+                        </flux:navlist.item>
+
                         @can('admin.contratos.index')
                         <flux:navlist.item icon="document-duplicate" :href="route('admin.contratos.index')" :current="request()->routeIs('admin.contratos*')">
                             Contratos

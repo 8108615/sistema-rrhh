@@ -42,4 +42,14 @@ class Empleado extends Model
     {
         return $this->hasMany(PagoEmpleado::class, 'empleado_id');
     }
+
+    public function marcaciones()
+    {
+        return $this->hasMany(Marcacion::class);
+    }
+
+    public function asistencias()
+    {
+        return $this->hasMany(Asistencia::class);
+    }
 }

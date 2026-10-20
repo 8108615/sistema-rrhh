@@ -1,0 +1,27 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+
+class Asistencia extends Model
+{
+    use HasFactory;
+
+    protected $table = 'asistencias';
+
+    protected $fillable = [
+        'empleado_id',
+        'fecha',
+        'primera_entrada',
+        'ultima_salida',
+        'horas_trabajadas',
+        'estado',
+    ];
+
+    public function empleado()
+    {
+        return $this->belongsTo(Empleado::class);
+    }
+}

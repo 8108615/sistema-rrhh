@@ -144,6 +144,11 @@ Route::delete('/admin/contratos/{id}', [App\Http\Controllers\Admin\ContratoContr
 Route::get('/admin/contratos/{id}/imprimir', [App\Http\Controllers\Admin\ContratoController::class, 'imprimir'])->name('admin.contratos.imprimir')->middleware(['auth', 'can:admin.contratos.index']);
 Route::get('/admin/contratos/{id}/download-pdf', [App\Http\Controllers\Admin\ContratoController::class, 'downloadPdf'])->name('admin.contratos.download-pdf')->middleware(['auth', 'can:admin.contratos.index']);
 
+// Rutas para Asistencias
+Route::get('/admin/asistencias', [App\Http\Controllers\Admin\AsistenciaController::class, 'index'])->name('admin.asistencias.index')->middleware(['auth']);
+Route::post('/admin/asistencias/importar', [App\Http\Controllers\Admin\AsistenciaController::class, 'importar'])->name('admin.asistencias.importar')->middleware(['auth']);
+
+
 Route::post('/logout', function (Request $request) {
     Auth::guard('web')->logout();
 
