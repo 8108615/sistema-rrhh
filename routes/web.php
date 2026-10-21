@@ -148,6 +148,12 @@ Route::get('/admin/contratos/{id}/download-pdf', [App\Http\Controllers\Admin\Con
 Route::get('/admin/asistencias', [App\Http\Controllers\Admin\AsistenciaController::class, 'index'])->name('admin.asistencias.index')->middleware(['auth']);
 Route::post('/admin/asistencias/importar', [App\Http\Controllers\Admin\AsistenciaController::class, 'importar'])->name('admin.asistencias.importar')->middleware(['auth']);
 
+// Rutas para Viáticos y Viajes
+Route::get('/admin/viaticos', [App\Http\Controllers\Admin\ViaticoController::class, 'index'])->name('admin.viaticos.index')->middleware(['auth']);
+Route::get('/admin/viaticos/create', [App\Http\Controllers\Admin\ViaticoController::class, 'create'])->name('admin.viaticos.create')->middleware(['auth']);
+Route::post('/admin/viaticos', [App\Http\Controllers\Admin\ViaticoController::class, 'store'])->name('admin.viaticos.store')->middleware(['auth']);
+Route::get('/admin/viaticos/{id}', [App\Http\Controllers\Admin\ViaticoController::class, 'show'])->name('admin.viaticos.show')->middleware(['auth']);
+Route::delete('/admin/viaticos/{id}', [App\Http\Controllers\Admin\ViaticoController::class, 'destroy'])->name('admin.viaticos.destroy')->middleware(['auth']);
 
 Route::post('/logout', function (Request $request) {
     Auth::guard('web')->logout();

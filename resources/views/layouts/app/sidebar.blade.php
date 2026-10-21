@@ -112,6 +112,10 @@
                         </flux:navlist.item>
                         @endcan
 
+                        <flux:navlist.item icon="map-pin" :href="route('admin.viaticos.index')" :current="request()->routeIs('admin.viaticos*')">
+                            Viáticos
+                        </flux:navlist.item>
+
 
                     </flux:navlist.group>
                     @endcanany

@@ -52,4 +52,11 @@ class Empleado extends Model
     {
         return $this->hasMany(Asistencia::class);
     }
+
+    public function viajes()
+    {
+        return $this->belongsToMany(Viaje::class, 'empleado_viaje', 'empleado_id', 'viaje_id')
+                    ->withPivot('monto_viatico')
+                    ->withTimestamps();
+    }
 }
