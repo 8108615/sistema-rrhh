@@ -153,7 +153,11 @@ Route::get('/admin/viaticos', [App\Http\Controllers\Admin\ViaticoController::cla
 Route::get('/admin/viaticos/create', [App\Http\Controllers\Admin\ViaticoController::class, 'create'])->name('admin.viaticos.create')->middleware(['auth']);
 Route::post('/admin/viaticos', [App\Http\Controllers\Admin\ViaticoController::class, 'store'])->name('admin.viaticos.store')->middleware(['auth']);
 Route::get('/admin/viaticos/{id}', [App\Http\Controllers\Admin\ViaticoController::class, 'show'])->name('admin.viaticos.show')->middleware(['auth']);
+Route::get('/admin/viaticos/{id}/edit', [App\Http\Controllers\Admin\ViaticoController::class, 'edit'])->name('admin.viaticos.edit')->middleware(['auth']);
+Route::put('/admin/viaticos/{id}', [App\Http\Controllers\Admin\ViaticoController::class, 'update'])->name('admin.viaticos.update')->middleware(['auth']);
 Route::delete('/admin/viaticos/{id}', [App\Http\Controllers\Admin\ViaticoController::class, 'destroy'])->name('admin.viaticos.destroy')->middleware(['auth']);
+Route::patch('/admin/viaticos/{id}/estado', [App\Http\Controllers\Admin\ViaticoController::class, 'actualizarEstado'])->name('admin.viaticos.estado')->middleware(['auth']);
+Route::get('/admin/viaticos/{id}/pdf', [App\Http\Controllers\Admin\ViaticoController::class, 'pdf'])->name('admin.viaticos.pdf')->middleware(['auth']);
 
 Route::post('/logout', function (Request $request) {
     Auth::guard('web')->logout();
